@@ -10,4 +10,8 @@ describe('index.ts', () => {
     it('add numbers by chai', () => {
         chai.expect(add(5, 2)).to.equal(7);
     });
+
+    it('add numbers', () => {
+        chai.expect(add(5, 9)).to.equal(14);
+    });
 });
