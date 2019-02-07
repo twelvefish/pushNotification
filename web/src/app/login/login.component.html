@@ -1,0 +1,45 @@
+<title>《{{pageTitle}}》登入</title>
+
+<div class="h90Flex">
+  <div class="container login">
+    <div class="col-lg-4">
+      <img class="golden-logo" src="../../assets/fish.svg" />
+      <form *ngIf="!logged">
+        <h4 *ngIf="resetMode">重設密碼</h4>
+        <div class="form-group">
+          <input type="email" [(ngModel)]="email" [ngModelOptions]="{standalone: true}" class="form-control"
+            placeholder="請輸入帳號" aria-label="帳號" aria-describedby="basic-addon1">
+        </div>
+        <div *ngIf="!resetMode" class="form-group">
+          <input type="password" [(ngModel)]="password" [ngModelOptions]="{standalone: true}" class="form-control"
+            placeholder="請輸入密碼" aria-label="密碼" aria-describedby="basic-addon2">
+        </div>
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+          <div class="form-group">
+            <button *ngIf="!resetMode" type="submit" class="btn btn-secondary active" (click)="signIn()">登入</button>
+            <button *ngIf="resetMode" type="submit" class="btn btn-secondary marginLeft8"
+              (click)="resetPassword()">重設</button>
+          </div>
+        </div>
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+          <div class="form-group">
+            <div *ngIf="!resetMode" class="myMouse" (click)="resetMode = !resetMode">重設密碼</div>
+            <div *ngIf="!resetMode" class="description">首次登入或忘記密碼請點 重設密碼</div>
+            <button *ngIf="resetMode" type="submit" class="btn btn-outline-secondary "
+              (click)="resetMode = !resetMode">取消</button>
+          </div>
+        </div>
+        <div class="response">
+          {{response}}
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 轉圈圈動畫 -->
+  <div *ngIf="animationLoading">
+    <div class="overlay"></div>
+    <div class="loader"></div>
+  </div>
+
+</div>

@@ -1,0 +1,50 @@
+.size{
+  height: 80%;
+  width: 85%;
+}
+
+.loader {
+   position: absolute;
+   border: 10px solid #f3f3f3;
+   border-top: 10px solid #3498db;
+   border-radius: 50%;
+   width: 100px;
+   height: 100px;
+   animation: spin 2s linear infinite;
+   top: 0;
+   right: 0;
+   bottom: 0;
+   left: 0;
+   margin: auto;
+   z-index: 90000;
+}
+
+.overlay {
+   background-color: black;
+   top: 0;
+   bottom: 0;
+   right: 0;
+   left: 0;
+   opacity: .5;
+   position: fixed;
+   z-index: 80000;
+}
+
+.flex-center {
+   display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.k-icon-18 {
+   font-size: 18px;
+}
+
+.k-icon-24 {
+   font-size: 24px;
+}
+
+.myMouse {
+   cursor: pointer;
+}

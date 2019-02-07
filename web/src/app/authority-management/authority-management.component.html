@@ -1,0 +1,80 @@
+<title>權限管理</title>
+<div class="flex-center" *ngIf="user">
+
+  <kendo-grid class="size k-icon-18" [data]="userGrid" [sortable]="true" (add)="addUser($event)" (edit)="editUser($event)"
+    (remove)="dialogOpenedDelete = true;selectedEvent = $event;" (cancel)="cancelUser($event)" (save)="dialogOpenedSave = true;selectedEvent = $event;">
+    <kendo-grid-messages noRecords="">
+    </kendo-grid-messages>
+
+    <ng-template kendoGridToolbarTemplate>
+      <button look="flat" kendoGridAddCommand icon="k-icon k-i-plus-outline k-icon-24"></button>
+      <label class="k-icon k-i-upload k-icon-24 myMouse" style="margin: 0 15px">
+        <input type="file" style="display:none;" id="fileButton" name="fileButton" accept=".xlsx,.ods" (change)="uploadUserFile($event)"
+          base-sixty-four-input />
+      </label>
+    </ng-template>
+
+    <kendo-grid-column field="name" title="姓名" width="30">
+      <ng-template kendoGridCellTemplate let-dataItem>
+        {{dataItem.name}}
+      </ng-template>
+    </kendo-grid-column>
+
+    <kendo-grid-column field="email" title="Email" width="130">
+    </kendo-grid-column>
+
+    <kendo-grid-column field="role" title="角色" width="30">
+      <ng-template kendoGridCellTemplate let-dataItem>
+        <div *ngIf="dataItem.role == 'admin'">工程師</div>
+        <div *ngIf="dataItem.role == 'staff'">小編</div>
+        <div *ngIf="dataItem.role == 'manager'">主管</div>
+      </ng-template>
+      <ng-template kendoGridEditTemplate let-dataItem="dataItem" let-formGroup="formGroup">
+        <kendo-dropdownlist class="k-icon-18" [data]="roleNames" [(ngModel)]="selectedRoleValue">
+        </kendo-dropdownlist>
+      </ng-template>
+    </kendo-grid-column>
+
+    <kendo-grid-command-column title="功能" width="60">
+      <ng-template kendoGridCellTemplate let-isNew="isNew" let-dataItem>
+        <button *ngIf="dataItem.role != 'admin'" look="flat" kendoGridEditCommand icon="k-icon k-i-track-changes-enable k-icon-24"
+          [primary]="true"></button>
+        <button *ngIf="dataItem.role != 'admin'" look="flat" kendoGridRemoveCommand icon="k-icon k-i-delete k-icon-24"></button>
+        <button look="flat" kendoGridSaveCommand icon="k-icon k-i-save k-icon-24" [disabled]="formGroup?.invalid"></button>
+        <button look="flat" kendoGridCancelCommand icon="k-icon k-i-minus-outline k-icon-24"></button>
+      </ng-template>
+    </kendo-grid-command-column>
+  </kendo-grid>
+
+  <div class="example-wrapper">
+    <kendo-dialog title="刪除" *ngIf="dialogOpenedDelete" (close)="dialogOpenedDelete = false;" [minWidth]="250" [width]="350">
+      <p *ngIf="selectedEvent.dataItem.role == 'staff'" style="margin: 30px; text-align: center;">確認刪除
+        {{selectedEvent.dataItem.name}} (小編)
+      </p>
+      <p *ngIf="selectedEvent.dataItem.role == 'manager'" style="margin: 30px; text-align: center;">確認刪除
+        {{selectedEvent.dataItem.name}} (主管)
+      </p>
+      <kendo-dialog-actions>
+        <button class="k-button" kendoButton (click)="removeHandler(selectedEvent)" primary="true">確認</button>
+        <button class="k-button" kendoButton (click)="dialogOpenedDelete = false;">取消</button>
+      </kendo-dialog-actions>
+    </kendo-dialog>
+  </div>
+
+  <div class="example-wrapper">
+    <kendo-dialog title="存檔" *ngIf="dialogOpenedSave" (close)="dialogOpenedSave = false;" [minWidth]="250" [width]="350">
+      <p style="margin: 30px; text-align: center;">存檔確認 ? </p>
+      <kendo-dialog-actions>
+        <button class="k-button" kendoButton (click)="saveHandler(selectedEvent)" primary="true">確認</button>
+        <button class="k-button" kendoButton (click)="dialogOpenedSave = false;">取消</button>
+      </kendo-dialog-actions>
+    </kendo-dialog>
+  </div>
+
+</div>
+
+<!-- 轉圈圈動畫 -->
+<div *ngIf="animationLoading">
+  <div class="overlay"></div>
+  <div class="loader"></div>
+</div>

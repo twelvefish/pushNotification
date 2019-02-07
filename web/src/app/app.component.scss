@@ -1,0 +1,38 @@
+.contain {
+  background-size: contain;
+  background-color: #dddddd;
+  .header {
+    width: 100%;
+    line-height: 2.5em;
+    padding: 0.2em 0;
+    margin: 0;
+    background-color: #2196de;
+    white-space: nowrap;
+    ul {
+      overflow: hidden;
+      padding: 0;
+      margin-bottom: -3px;
+      position: relative;
+      text-align: left;
+      li {
+        display: inline-block;
+        color: #ffffff;
+        font-family: "PingFang TC";
+        font-size: 16px;
+        padding: 0 1em;
+        position: relative;
+        text-align: center;
+        margin: 0 5px;
+      }
+    }
+    .selected {
+      background-color: #dddddd;
+      font-weight: 500;
+      color: black;
+    }
+  }
+}
+
+.myMouse {
+  cursor: pointer;
+}
