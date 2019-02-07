@@ -4,7 +4,7 @@
       <li [attr.class]="type == 'pushCenter' ? 'selected myMouse' :'myMouse'" (click)="selectedPush()">發訊中心</li>
       <li [attr.class]="type == 'authorityManagement' ? 'selected myMouse' :'myMouse'" (click)="selectedManagement()"
         *ngIf="user.role != 'staff'">權限管理</li>
-      <li [attr.class]="type == 'messageReview' ? 'selected myMouse' :'myMouse'" (click)="selectedReview()">訊息審核</li>
+      <li [attr.class]="type == 'reviewMessage' ? 'selected myMouse' :'myMouse'" (click)="selectedReview()">訊息審核</li>
       <li class="float-right myMouse" (click)="signOut()">登出</li>
       <li class="float-right"></li>
       <li *ngIf="user.role == 'admin'" class="float-right">{{user.name}} 工程師</li>

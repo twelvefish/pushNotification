@@ -14,6 +14,11 @@
       margin-bottom: -3px;
       position: relative;
       text-align: left;
+      .selected {
+        background-color: #dddddd;
+        font-weight: 500;
+        color: black;
+      }
       li {
         display: inline-block;
         color: #ffffff;
@@ -24,11 +29,6 @@
         text-align: center;
         margin: 0 5px;
       }
-    }
-    .selected {
-      background-color: #dddddd;
-      font-weight: 500;
-      color: black;
     }
   }
 }
