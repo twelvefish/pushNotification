@@ -13,7 +13,7 @@ import { User } from '../model';
 @Component({
   selector: 'app-authority-management',
   templateUrl: './authority-management.component.html',
-  styleUrls: ['./authority-management.component.css']
+  styleUrls: ['./authority-management.component.scss']
 })
 export class AuthorityManagementComponent implements OnInit {
 

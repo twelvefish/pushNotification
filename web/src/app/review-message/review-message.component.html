@@ -1,3 +1,25 @@
-<p>
-  review-message works!
-</p>
+<kendo-grid class="k-icon-18" [loading]="loading" [data]="receiversGrid" [pageSize]="pageSize" [skip]="skip"
+  [sortable]="true" [sort]="sort" [pageable]="true" (dataStateChange)="onRecordDetailStateChange($event)"
+  selectable="true" style="margin: 2%;" filterable="menu" height="400">
+  <kendo-grid-column field="name" title="收訊人" width="50" [filterable]="false">
+  </kendo-grid-column>
+  <kendo-grid-column field="content" title="訊息內容" width="100" [filterable]="false">
+    <ng-template kendoGridCellTemplate let-dataItem>
+      <div [innerHtml]="dataItem.content"></div>
+    </ng-template>
+  </kendo-grid-column>
+  <kendo-grid-column field="urls" title="文件" width="80" [filterable]="false">
+    <ng-template kendoGridCellTemplate let-dataItem>
+      <ng-container *ngIf="dataItem.urls">
+        <div *ngFor="let file of dataItem.urls">
+          <a target="_blank" [href]="file.url" style="color:#007bff">{{file.name}}</a>
+        </div>
+      </ng-container>
+    </ng-template>
+  </kendo-grid-column>
+</kendo-grid>
+<div *ngIf="btnVisible">
+  <button kendoButton type="button" class="btn btn-danger" style="float: right;" (click)="onClickReject()">駁回</button>
+  <button kendoButton type="button" class="btn btn-success" style="float: right;margin: 0 10px;"
+    (click)="onClickAgree()">核准</button>
+</div>

@@ -7,56 +7,59 @@ import { User } from "./model"
 import "rxjs/add/operator/map"
 
 @Component({
-	selector: "app-root",
-	templateUrl: "./app.component.html",
-	styleUrls: ["./app.component.scss"]
+  selector: "app-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.scss"]
 })
 export class AppComponent {
 
-	logged: Boolean = false
-	user: User
-	type: string = "pushCenter"
-	isUserLoggedIn: boolean;
+  logged: Boolean = false
+  user: User
+  type: string = "pushCenter"
+  isUserLoggedIn: boolean;
 
-	constructor(private auth: AngularFireAuth,
-		private userService: UserService,
-		private router: Router
-	) {
-		this.type = window.location.pathname.replace("/", "")
-		this.auth.authState.subscribe(firebaseUser => {
-			if (firebaseUser) {
-				console.log("firebaseUser", firebaseUser)
-				this.userService.getUserById(firebaseUser.uid).subscribe(users => {
-					if (users.length == 0) {
-						this.signOut()
-					} else {
-						this.user = users[0]
-						console.log("user", users[0])
-					}
-				})
-			}
-		})
-	}
+  constructor(private auth: AngularFireAuth,
+    private userService: UserService,
+    private router: Router
+  ) {
+    this.auth.authState.subscribe(firebaseUser => {
+      if (firebaseUser) {
+        this.type = window.location.pathname.replace("/", "")
+        if (this.type == '' || this.type == 'login') {
+          this.type = "pushCenter"
+        }
+        console.log("firebaseUser", firebaseUser)
+        this.userService.getUserById(firebaseUser.uid).subscribe(users => {
+          if (users.length == 0) {
+            this.signOut()
+          } else {
+            this.user = users[0]
+            console.log("user", users[0])
+          }
+        })
+      }
+    })
+  }
 
-	signOut(): void {
-		this.user = null
-		this.isUserLoggedIn = false;
-		this.auth.auth.signOut()
-		this.router.navigate(["/login"]);
-	}
+  signOut(): void {
+    this.user = null
+    this.isUserLoggedIn = false;
+    this.auth.auth.signOut()
+    this.router.navigate(["/login"]);
+  }
 
-	selectedPush() {
-		this.type = "pushCenter"
-		this.router.navigate([`/pushCenter`])
-	}
+  selectedPush() {
+    this.type = "pushCenter"
+    this.router.navigate([`/pushCenter`])
+  }
 
-	selectedManagement() {
-		this.type = "authorityManagement"
-		this.router.navigate([`/authorityManagement`])
-	}
+  selectedManagement() {
+    this.type = "authorityManagement"
+    this.router.navigate([`/authorityManagement`])
+  }
 
-	selectedReview() {
-		this.type = "reviewMessage"
-		this.router.navigate([`/reviewMessage`])
-	}
+  selectedReview() {
+    this.type = "reviewMessage"
+    this.router.navigate([`/reviewMessage`])
+  }
 }
