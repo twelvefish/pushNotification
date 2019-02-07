@@ -1,25 +1,238 @@
-<kendo-grid class="k-icon-18" [loading]="loading" [data]="receiversGrid" [pageSize]="pageSize" [skip]="skip"
-  [sortable]="true" [sort]="sort" [pageable]="true" (dataStateChange)="onRecordDetailStateChange($event)"
-  selectable="true" style="margin: 2%;" filterable="menu" height="400">
-  <kendo-grid-column field="name" title="收訊人" width="50" [filterable]="false">
-  </kendo-grid-column>
-  <kendo-grid-column field="content" title="訊息內容" width="100" [filterable]="false">
-    <ng-template kendoGridCellTemplate let-dataItem>
-      <div [innerHtml]="dataItem.content"></div>
-    </ng-template>
-  </kendo-grid-column>
-  <kendo-grid-column field="urls" title="文件" width="80" [filterable]="false">
-    <ng-template kendoGridCellTemplate let-dataItem>
-      <ng-container *ngIf="dataItem.urls">
-        <div *ngFor="let file of dataItem.urls">
-          <a target="_blank" [href]="file.url" style="color:#007bff">{{file.name}}</a>
+<title>訊息審核</title>
+<div class="flex-center">
+  <div class="myTab">
+
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile"
+          aria-selected="true">待處理</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
+          aria-selected="false">已處理</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact"
+          aria-selected="false">逾期</a>
+      </li>
+    </ul>
+
+    <div class="tab-content" style="height: 100%">
+
+      <!-- 待處理 filterable="menu" -->
+      <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab"
+        style="height: 100%">
+        <kendo-grid class="k-icon-18" [data]="unprocessedGrid" [loading]="!unprocessedGrid" selectable="true"
+          style="margin: 2%;height: 80%;" [sortable]="true" [sort]="sortList">
+          <kendo-grid-messages noRecords="無待處理事項"></kendo-grid-messages>
+          <kendo-grid-column field="sender" title="發訊者" width="80">
+            <ng-template kendoGridCellTemplate let-dataItem>
+              {{dataItem.sender.name}}
+            </ng-template>
+          </kendo-grid-column>
+          <kendo-grid-column field="expectTime" title="預定時間" width="100" filter="date" format="{0:d}" width="150">
+            <ng-template kendoGridCellTemplate let-dataItem>
+              <div *ngIf="dataItem.expectTime != '9999999999999'">{{dataItem.expectTime | date:'yyyy-MM-dd
+                        HH:mm'}}</div>
+              <div *ngIf="dataItem.expectTime == '9999999999999'">立即發送</div>
+            </ng-template>
+          </kendo-grid-column>
+          <kendo-grid-column field="channel" title="頻道" width="80">
+          </kendo-grid-column>
+          <kendo-grid-column field="state" title="審核狀態" width="80" filter="boolean">
+            <ng-template kendoGridCellTemplate let-dataItem>
+              <span *ngIf="dataItem.state == 0">
+                <!-- <span class="k-icon k-i-radiobutton"></span>  -->
+                ! 待審核
+              </span>
+            </ng-template>
+            <ng-template kendoGridFilterMenuTemplate let-column="column" let-filter="filter"
+              let-filterService="filterService">
+              <kendo-multiselect style="width:220px" [data]="approvalState" [valuePrimitive]="true"
+                (valueChange)="categoryChange($event, filterService)">
+              </kendo-multiselect>
+            </ng-template>
+          </kendo-grid-column>
+
+          <ng-template kendoGridDetailTemplate let-dataItem>
+            <app-grid-detail [btnVisible]="true" [reviewMessage]="dataItem"
+              (clickAgree)="dialogOpenedResolve = true;selectedReviewMessage = dataItem"
+              (clickReject)="dialogOpenedReject = true;selectedReviewMessage = dataItem"></app-grid-detail>
+          </ng-template>
+        </kendo-grid>
+
+        <div class="example-wrapper">
+          <kendo-dialog title="審核" *ngIf="dialogOpenedResolve" (close)="dialogOpenedResolve = false;" [minWidth]="250"
+            [width]="350">
+            <p style="margin: 30px; text-align: center;">確認發送 ? </p>
+            <kendo-dialog-actions>
+              <button class="k-button" kendoButton (click)="resolve(selectedReviewMessage)" primary="true">確認</button>
+              <button class="k-button" kendoButton (click)="dialogOpenedResolve = false;">取消</button>
+            </kendo-dialog-actions>
+          </kendo-dialog>
         </div>
-      </ng-container>
-    </ng-template>
-  </kendo-grid-column>
-</kendo-grid>
-<div *ngIf="btnVisible">
-  <button kendoButton type="button" class="btn btn-danger" style="float: right;" (click)="onClickReject()">駁回</button>
-  <button kendoButton type="button" class="btn btn-success" style="float: right;margin: 0 10px;"
-    (click)="onClickAgree()">核准</button>
+
+        <div class="example-wrapper">
+          <kendo-dialog title="審核" *ngIf="dialogOpenedReject" (close)="dialogOpenedReject = false;" [minWidth]="250"
+            [width]="350">
+            <p style="margin: 30px; text-align: center;">確認駁回 ? </p>
+            <kendo-dialog-actions>
+              <button class="k-button" kendoButton (click)="reject(selectedReviewMessage)" primary="true">確認</button>
+              <button class="k-button" kendoButton (click)="dialogOpenedReject = false;">取消</button>
+            </kendo-dialog-actions>
+          </kendo-dialog>
+        </div>
+      </div>
+
+      <!-- 已處理 filterable="menu" -->
+      <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab" style="height: 100%">
+        <kendo-grid class="k-icon-18" [data]="processedGrid" [loading]="!processedGrid"
+          (dataStateChange)="dataStateChange($event)" selectable="true" style="margin: 2%;height: 80%;"
+          [sortable]="true" [sort]="sortList">
+          <kendo-grid-messages noRecords="無已處理事項"></kendo-grid-messages>
+          <kendo-grid-column field="sender" title="發訊者" width="80" filter='disable'>
+            <ng-template kendoGridCellTemplate let-dataItem>
+              {{dataItem.sender.name}}
+            </ng-template>
+          </kendo-grid-column>
+          <kendo-grid-column field="auditor" title="審核者" width="80" filter='disable'>
+            <ng-template kendoGridCellTemplate let-dataItem>
+              {{dataItem.auditor.name}}
+            </ng-template>
+          </kendo-grid-column>
+          <kendo-grid-column field="expectTime" title="預定時間" width="100" filter="date" format="{0:d}" width="150">
+            <ng-template kendoGridCellTemplate let-dataItem>
+              <div *ngIf="dataItem.expectTime != '9999999999999'">{{dataItem.expectTime | date:'yyyy-MM-dd
+                        HH:mm'}}</div>
+              <div *ngIf="dataItem.expectTime == '9999999999999'">立即發送</div>
+            </ng-template>
+          </kendo-grid-column>
+          <kendo-grid-column field="channel" title="頻道" width="50">
+            <!-- <ng-template kendoGridFilterMenuTemplate let-column="column" let-filter="filter" let-filterService="filterService">
+                     <ul class="gridMenu">
+                        <li (click)="onSelectionChange('Line')">
+                           <div class="custom-control custom-checkbox">
+                              <input type="checkbox" class="custom-control-input" id="Line">
+                              <label class="custom-control-label" for="Line">Line</label>
+                           </div>
+                        </li>
+                        <li (click)="onSelectionChange('Wechat')">
+                           <div class="custom-control custom-checkbox my-1 mr-sm-2">
+                              <input type="checkbox" class="custom-control-input" id="Wechat">
+                              <label class="custom-control-label" for="Wechat">Wechat</label>
+                           </div>
+                        </li>
+                     </ul>
+                  </ng-template> -->
+          </kendo-grid-column>
+          <kendo-grid-column field="state" title="審核狀態" width="100">
+            <ng-template kendoGridCellTemplate let-dataItem>
+              <span *ngIf="dataItem.state == 1">
+                <span class="k-icon k-i-radiobutton green"></span> 通過，尚未發送
+              </span>
+              <span *ngIf="dataItem.state == 2">
+                <span class="k-icon k-i-hyperlink-email green"></span> 已發送
+              </span>
+              <span *ngIf="dataItem.state == 3">
+                <span class="k-icon k-i-close red"></span> 未通過
+              </span>
+            </ng-template>
+            <ng-template kendoGridFilterMenuTemplate let-column="column" let-filter="filter"
+              let-filterService="filterService">
+              <kendo-multiselect style="width:220px" [data]="approvalState" [valuePrimitive]="true"
+                (valueChange)="categoryChange($event, filterService)">
+              </kendo-multiselect>
+              <!-- <kendo-grid-boolean-filter-menu [column]="column" [filter]="filter" [filterService]="filterService">
+                     </kendo-grid-boolean-filter-menu> -->
+            </ng-template>
+          </kendo-grid-column>
+
+          <ng-template kendoGridDetailTemplate let-dataItem>
+            <app-grid-detail [reviewMessage]="dataItem"
+              (clickAgree)="dialogOpenedResolve = true;selectedReviewMessage = dataItem"
+              (clickReject)="dialogOpenedReject = true;selectedReviewMessage = dataItem"></app-grid-detail>
+
+            <!-- <kendo-grid class="k-icon-18" [data]="dataItem.receivers" selectable="true" style="margin: 2%;"
+                     filterable="menu">
+                     <kendo-grid-column field="name" title="收訊人" width="50" [filterable]="false">
+                     </kendo-grid-column>
+                     <kendo-grid-column field="content" title="訊息內容" width="100" [filterable]="false">
+                     </kendo-grid-column>
+                     <kendo-grid-column field="urls" title="文件" width="80" [filterable]="false">
+                        <ng-template kendoGridCellTemplate let-dataItem>
+                           <ng-container *ngIf="dataItem.urls">
+                              <div *ngFor="let file of dataItem.urls">
+                                 <a target="_blank" [href]="file.url" style="color:#007bff">{{file.name}}</a>
+                              </div>
+                           </ng-container>
+                        </ng-template>
+                     </kendo-grid-column>
+                  </kendo-grid> -->
+          </ng-template>
+        </kendo-grid>
+      </div>
+
+      <!-- 逾期 filterable="menu" -->
+      <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab" style="height: 100%">
+        <kendo-grid class="k-icon-18" [data]="overdueGrid" [loading]="!overdueGrid" selectable="true"
+          style="margin: 2%;height: 80%;" [sortable]="true" [sort]="sortList">
+          <kendo-grid-messages noRecords="無逾期事項"></kendo-grid-messages>
+          <kendo-grid-column field="sender" title="發訊者" width="80">
+            <ng-template kendoGridCellTemplate let-dataItem>
+              {{dataItem.sender.name}}
+            </ng-template>
+          </kendo-grid-column>
+          <kendo-grid-column field="expectTime" title="預定時間" width="100" filter="date" format="{0:d}" width="150">
+            <ng-template kendoGridCellTemplate let-dataItem>
+              {{dataItem.expectTime | date:'yyyy-MM-dd HH:mm'}}
+            </ng-template>
+          </kendo-grid-column>
+          <kendo-grid-column field="channel" title="頻道" width="80">
+          </kendo-grid-column>
+          <kendo-grid-column field="state" title="審核狀態" width="80" filter="boolean">
+            <ng-template kendoGridCellTemplate let-dataItem>
+              <span *ngIf="dataItem.state == 0">
+                <span class="k-icon k-i-calendar-date"></span> 逾期
+              </span>
+            </ng-template>
+            <ng-template kendoGridFilterMenuTemplate let-column="column" let-filter="filter"
+              let-filterService="filterService">
+              <kendo-multiselect style="width:220px" [data]="approvalState" [valuePrimitive]="true"
+                (valueChange)="categoryChange($event, filterService)">
+              </kendo-multiselect>
+            </ng-template>
+          </kendo-grid-column>
+
+          <ng-template kendoGridDetailTemplate let-dataItem>
+            <app-grid-detail [reviewMessage]="dataItem"
+              (clickAgree)="dialogOpenedResolve = true;selectedReviewMessage = dataItem"
+              (clickReject)="dialogOpenedReject = true;selectedReviewMessage = dataItem"></app-grid-detail>
+            <!-- <kendo-grid class="k-icon-18" [data]="dataItem.receivers" selectable="true" style="margin: 2%;"
+                     filterable="menu">
+                     <kendo-grid-column field="name" title="收訊人" width="50" [filterable]="false">
+                     </kendo-grid-column>
+                     <kendo-grid-column field="content" title="訊息內容" width="100" [filterable]="false">
+                     </kendo-grid-column>
+                     <kendo-grid-column field="urls" title="文件" width="80" [filterable]="false">
+                        <ng-template kendoGridCellTemplate let-dataItem>
+                           <ng-container *ngIf="dataItem.urls">
+                              <div *ngFor="let file of dataItem.urls">
+                                 <a target="_blank" [href]="file.url" style="color:#007bff">{{file.name}}</a>
+                              </div>
+                           </ng-container>
+                        </ng-template>
+                     </kendo-grid-column>
+                  </kendo-grid> -->
+          </ng-template>
+        </kendo-grid>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 轉圈圈動畫 -->
+<div *ngIf="updateSuccess">
+  <div class="overlay"></div>
+  <div class="loader"></div>
 </div>
