@@ -28,7 +28,7 @@ export class AppComponent {
         if (this.type == '' || this.type == 'login') {
           this.type = "pushCenter"
         }
-        console.log("firebaseUser", firebaseUser)
+
         this.userService.getUserById(firebaseUser.uid).subscribe(users => {
           if (users.length == 0) {
             this.signOut()

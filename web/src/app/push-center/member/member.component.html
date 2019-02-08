@@ -1,0 +1,242 @@
+<div class="sention" *ngIf="loginUser">
+
+  <!-- 第一層選單 -->
+  <div class="nav nav-tabs menu1">
+    <div class="nav-item myMouse">
+      <span [ngClass]="majorMenuSelected === 'customerService' ? 'nav-link active' : 'nav-link '"
+        [attr.id]="majorMenuSelected === 'customerService' ? 'navSelected' : ''" (click)="selectCustomer()">客服</span>
+    </div>
+    <div class="nav-item myMouse">
+      <span [ngClass]="majorMenuSelected === 'pushService' ? 'nav-link active' : 'nav-link '"
+        [attr.id]="majorMenuSelected === 'pushService' ? 'navSelected' : ''" (click)="selectPushMessage()">發訊</span>
+    </div>
+  </div>
+
+  <!-- 第二層選單 -->
+  <div class="menu2">
+
+    <ng-container *ngIf="majorMenuSelected == 'customerService'">
+      <span [ngClass]="secondMenuSelected == 'contact' ? 'menuBtn selected myMouse' : 'menuBtn myMouse'"
+        (click)=" selectContact()">組織</span>
+      <span [ngClass]="secondMenuSelected == 'unRead' ? 'menuBtn selected myMouse' : 'menuBtn myMouse'"
+        (click)=" selectUnRead()">未讀</span>
+    </ng-container>
+
+    <ng-container *ngIf="majorMenuSelected == 'pushService'">
+      <span [ngClass]="secondMenuSelected == 'push' ? 'menuBtn selected myMouse' : 'menuBtn myMouse'"
+        (click)=" selectPush()">組織</span>
+      <span [ngClass]="secondMenuSelected == 'group' ? 'menuBtn selected myMouse' : 'menuBtn myMouse'"
+        (click)=" selectGroup()">名單</span>
+      <span [ngClass]="secondMenuSelected == 'list' ? 'menuBtn selected myMouse' : 'menuBtn myMouse'"
+        (click)=" selectList()">批次</span>
+    </ng-container>
+
+  </div>
+
+  <!-- 客服 -->
+  <div *ngIf="secondMenuSelected == 'contact'" style="height: 112%;">
+    <input type="text" class="form-control" (change)="filterSearch()" [(ngModel)]="searchText" placeholder="搜尋">
+    <div id="scrollTouch" style="height: 70%;">
+      <kendo-treeview [nodes]="contactTree" textField="text" kendoTreeViewExpandable
+        [(expandedKeys)]="contactTreeExpanded" kendoTreeViewSelectable kendoTreeViewFlatDataBinding idField="id"
+        parentIdField="parentId" style="font-size: 20px;">
+        <ng-template kendoTreeViewNodeTemplate let-dataItem grid-alt-bg>
+          <div *ngIf="dataItem.type == 'phone'">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>
+            <a style="color:gray;margin: 0px 8px" href="tel:{{dataItem.text}}">{{dataItem.text}}</a>
+          </div>
+          <div *ngIf="dataItem.type == 'email'">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>
+            <a style="color:gray;margin: 0px 8px" href="mailTo:{{dataItem.text}}">{{dataItem.text}}</a>
+          </div>
+          <div *ngIf="dataItem.type == 'root'|| dataItem.type == 'division' || dataItem.type == 'lineGroup'">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+          <div *ngIf="dataItem.type == 'line'" (click)="getMemberRecord(dataItem)">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+          <div *ngIf="dataItem.type == 'group'" class="disableSelect">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+          <div *ngIf="dataItem.type == 'wechat'" (click)="getMemberRecord(dataItem)">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+          <div *ngIf="dataItem.type == 'department'">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+          <div *ngIf="dataItem.type == 'loginUser'" class="disableSelect" (click)="getMemberRecord(dataItem)">
+            <span [ngClass]="kendoService.iconClass(dataItem)" [ngClass]="memberActivityClass(dataItem)"></span>
+            {{dataItem.text}}
+          </div>
+        </ng-template>
+      </kendo-treeview>
+    </div>
+  </div>
+
+  <!-- 未讀 -->
+  <div style="height: 100%;" *ngIf="secondMenuSelected == 'unRead'">
+    <input type="text" class="form-control" (change)="filterSearch()" [(ngModel)]="searchText" placeholder="搜尋">
+    <div id="scrollTouch" style="height: 70%;">
+      <kendo-treeview [nodes]="unReadTree" textField="text" kendoTreeViewExpandable
+        [(expandedKeys)]="unReadTreeExpanded" kendoTreeViewSelectable kendoTreeViewFlatDataBinding idField="id"
+        parentIdField="parentId" style="font-size: 20px;">
+        <ng-template kendoTreeViewNodeTemplate let-dataItem>
+          <div *ngIf="dataItem.type == 'root' || dataItem.type == 'lineGroup'">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+          <div *ngIf="dataItem.type == 'loginUser'" class="disableSelect" (click)="getMemberRecord(dataItem)">
+            <span [ngClass]="kendoService.iconClass(dataItem)"
+              [ngClass]="memberActivityClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+          <div class="circle"
+            *ngIf="dataItem.type =='loginUser' && (dataItem.data.lineCount || dataItem.data.wechatCount)">{{dataItem.data.lineCount
+                        + dataItem.data.wechatCount}}</div>
+          <div *ngIf="dataItem.type == 'phone'">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>
+            <a style="color:gray;margin: 0px 8px" href="tel:{{dataItem.text}}">{{dataItem.text}}</a>
+          </div>
+          <div *ngIf="dataItem.type == 'group'" class="disableSelect">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+          <div *ngIf="dataItem.type == 'email'">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>
+            <a style="color:gray;margin: 0px 8px" href="mailTo:{{dataItem.text}}">{{dataItem.text}}</a>
+          </div>
+          <div *ngIf="dataItem.type == 'line'" (click)="getMemberRecord(dataItem)">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+          <div *ngIf="dataItem.type == 'wechat'" (click)="getMemberRecord(dataItem)">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+        </ng-template>
+      </kendo-treeview>
+    </div>
+  </div>
+
+  <!-- 發訊 -->
+  <div style="height: 100%;" *ngIf="secondMenuSelected == 'push'">
+    <input type="text" class="form-control" (change)="filterSearch()" [(ngModel)]="searchText" placeholder="搜尋">
+    <div id="scrollTouch" style="height: 70%;">
+      <kendo-treeview [nodes]="pushTree" textField="text" kendoTreeViewExpandable [(expandedKeys)]="pushTreeExpanded"
+        kendoTreeViewSelectable kendoTreeViewFlatDataBinding idField="id" parentIdField="parentId"
+        style="font-size: 20px;">
+        <ng-template kendoTreeViewNodeTemplate let-dataItem>
+          <div *ngIf="dataItem.type == 'phone'">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>
+            <a style="color:gray;margin: 0px 8px" href="tel:{{dataItem.text}}">{{dataItem.text}}</a>
+          </div>
+          <div *ngIf="dataItem.type == 'email'">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>
+            <a style="color:gray;margin: 0px 8px" href="mailTo:{{dataItem.text}}">{{dataItem.text}}</a>
+          </div>
+          <div *ngIf="dataItem.type == 'root' || dataItem.type == 'lineGroup'">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+          <div *ngIf="dataItem.type == 'line'">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+          <div *ngIf="dataItem.type == 'group'" class="disableSelect" (click)="pushMember(dataItem)">
+            <span *ngIf="receivers && checkReceivers(dataItem)" class="fa fa-check"
+              style="font-size:20px;color:green"></span>
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+          <div *ngIf="dataItem.type == 'wechat'">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+          <div *ngIf="dataItem.type == 'division'" (click)="pushTotalMembers(dataItem)">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+          <div *ngIf="dataItem.type == 'department'" (click)="pushMembers(dataItem)">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+          <div *ngIf="dataItem.type == 'loginUser'" class="disableSelect" (click)="pushMember(dataItem)">
+            <span [ngClass]="kendoService.iconClass(dataItem)" [ngClass]="memberActivityClass(dataItem)"></span>
+            <span *ngIf="receivers && checkReceivers(dataItem)" class="fa fa-check"
+              style="font-size:20px;color:green"></span>{{dataItem.text}}
+          </div>
+        </ng-template>
+      </kendo-treeview>
+    </div>
+  </div>
+
+  <!-- 名單 -->
+  <div style="height: 100%;" *ngIf="secondMenuSelected == 'group'">
+    <input type="text" class="form-control" (change)="filterSearch()" [(ngModel)]="searchText" placeholder="搜尋">
+    <div id="scrollTouch" style="height: 70%;">
+      <kendo-treeview [nodes]="groupTree" textField="text" kendoTreeViewExpandable [(expandedKeys)]="groupTreeExpanded"
+        kendoTreeViewSelectable kendoTreeViewFlatDataBinding idField="id" parentIdField="parentId"
+        style="font-size: 20px;">
+        <ng-template kendoTreeViewNodeTemplate let-dataItem>
+          <div *ngIf="dataItem.type == 'root'">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+            <span style="font-size: 24px;margin: auto;" class="k-icon k-i-plus-outline"
+              (click)="editBoolean = true;editType = 'createGroup';"></span>
+          </div>
+          <div *ngIf="dataItem.type == 'org'">
+            <span (click)="pushMembersOfGroup(dataItem)">
+              <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+            </span>
+            <span class="k-icon k-i-track-changes-enable" style="font-size: 24px"
+              (click)="editKendoGridGroup(dataItem);editType = 'editGroup';"></span>
+            <span class="k-icon k-i-delete" style="font-size: 24px"
+              (click)="editKendoGridGroup(dataItem);editType = 'deleteGroup';"></span>
+          </div>
+          <div *ngIf="dataItem.type == 'loginUser'" class="disableSelect" (click)="pushMember(dataItem)">
+            <span [ngClass]="kendoService.iconClass(dataItem)" [ngClass]="memberActivityClass(dataItem)"></span>
+            <span *ngIf="receivers && checkReceivers(dataItem)" class="fa fa-check"
+              style="font-size:20px;color:green"></span>{{dataItem.text}}
+          </div>
+          <div *ngIf="dataItem.type == 'group'" class="disableSelect" (click)="pushMember(dataItem)">
+            <span *ngIf="receivers && checkReceivers(dataItem)" class="fa fa-check"
+              style="font-size:20px;color:green"></span>
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+          <div *ngIf="dataItem.type == 'phone'">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>
+            <a style="color:gray;margin: 0px 8px" href="tel:{{dataItem.text}}">{{dataItem.text}}</a>
+          </div>
+          <div *ngIf="dataItem.type == 'email'">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>
+            <a style="color:gray;margin: 0px 8px" href="mailTo:{{dataItem.text}}">{{dataItem.text}}</a>
+          </div>
+          <div *ngIf="dataItem.type == 'line' || dataItem.type == 'lineGroup'">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+          <div *ngIf="dataItem.type == 'wechat'">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+          </div>
+        </ng-template>
+      </kendo-treeview>
+    </div>
+  </div>
+
+  <!-- 批次 -->
+  <div style="height: 100%;" *ngIf="secondMenuSelected == 'list'">
+    <input type="text" class="form-control" (change)="filterSearch()" [(ngModel)]="searchText" placeholder="搜尋">
+    <div id="scrollTouch" style="height: 70%;">
+      <kendo-treeview [nodes]="listTree" textField="text" kendoTreeViewExpandable [(expandedKeys)]="listTreeExpanded"
+        kendoTreeViewSelectable kendoTreeViewFlatDataBinding idField="id" parentIdField="parentId"
+        style="font-size: 20px;">
+        <ng-template kendoTreeViewNodeTemplate let-dataItem>
+          <div *ngIf="dataItem.type == 'root'">
+            <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+            <span style="font-size: 24px;margin: auto;" class="k-icon k-i-plus-outline"
+              (click)="editBoolean = true;editType = 'createBatch';"></span>
+          </div>
+          <div *ngIf="dataItem.type == 'org'">
+            <span (click)="chooseKendoData(dataItem)">
+              <span *ngIf="gridList && dataItem.id == gridList.id" class="fa fa-check"
+                style="font-size:20px;color:green"></span>
+              <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+            </span>
+            <span class="k-icon k-i-track-changes-enable" style="font-size: 24px"
+              (click)="editKendoGridList(dataItem);editType = 'editBatch';"></span>
+            <span class="k-icon k-i-delete" style="font-size: 24px"
+              (click)="editKendoGridList(dataItem);editType = 'deleteBatch';"></span>
+          </div>
+        </ng-template>
+      </kendo-treeview>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,38 @@
+.sention {
+  padding: 10px;
+  margin: 10px;
+  border: rgba(48, 48, 48, 0.473);
+  border-style: solid;
+  border-width: 0.05em;
+  border-radius: 1em;
+  padding-left: 5%;
+  padding-right: 5%;
+  height: 100%;
+  width: 100%;
+  min-height: 500px;
+  background-color: white;
+}
+
+.menu2 {
+  margin: 0.4em 0;
+
+  .menuBtn {
+    border-radius: 50px;
+    font-size: 16px;
+    background-color: white;
+    border: 1px solid #17a2b8;
+    color: #17a2b8;
+    padding: 3px 10px;
+    letter-spacing: 5px;
+    font-weight: 300;
+    margin: 0.2em 0.2em;
+  }
+  .selected {
+    background-color: #17a2b8;
+    color: white;
+  }
+}
+
+.myMouse {
+  cursor: pointer;
+}

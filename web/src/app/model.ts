@@ -81,7 +81,7 @@ export type Group = {
   ownerId: string
 }
 
-export type BatchGroup = {
+export type List = {
   id: string
   members: Content[]
   name: string
