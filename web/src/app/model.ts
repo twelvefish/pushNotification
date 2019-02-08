@@ -67,8 +67,10 @@ export type ChatMessage = {
 export type RecordDetail = {
   id: string
   channel: "Line" | "WeChat" | "SMS" | "Email"
-  content: string
-  receiver: string
+  // content: string 將來改名
+  message: string
+  // receiver: string 將來改型態
+  receiver: Receiver
   receiveTime: number
   read: boolean
   urls: Urls[]
@@ -120,6 +122,17 @@ export type Urls = {
 
 export type Receiver = {
   id: string
-  index: number
+  index?: number
   data: any[]
+}
+
+export class Uploader {
+  file: File;
+  name: string;
+  url: string;
+  progress: number;
+  createdAt: Date = new Date();
+  constructor(file: File) {
+    this.file = file;
+  }
 }

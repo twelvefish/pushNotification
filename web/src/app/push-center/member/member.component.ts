@@ -1,7 +1,8 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { User } from 'src/app/model';
 
-import { KendoService } from '../../controllerServices/kendo.service'
+import { KendoService } from '../../controllerServices/kendo/kendo.service'
+import { MemberService } from '../../services/member/member.service'
 
 @Component({
   selector: 'app-member',
@@ -31,12 +32,15 @@ export class MemberComponent implements OnInit {
   listTree: any[] = []
   listTreeExpanded = []
 
-  constructor() {
+  constructor(
+    private memberService: MemberService,
+    public kendoService: KendoService,
+  ) {
 
   }
 
   ngOnInit() {
-    console.log("member loginUser", this.loginUser)
+    this.selectCustomer()
   }
 
   onClickMemberMenu(e: string) {
@@ -58,6 +62,12 @@ export class MemberComponent implements OnInit {
   selectContact() {
     this.onClickMemberMenu("contact")
     this.secondMenuSelected = "contact"
+
+    this.memberService.getMembers().subscribe(members => {
+      this.contactTree = this.kendoService.toMemberTree(members)
+      this.contactTreeExpanded = ['0', '0_0']
+    })
+
   }
 
   selectUnRead() {

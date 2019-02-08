@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core'
 import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore'
 import { Observable } from 'rxjs'
-import { ReviewMessage, Receiver } from '../model'
+import { ReviewMessage, Receiver } from '../../model'
 
 @Injectable({
   providedIn: 'root'

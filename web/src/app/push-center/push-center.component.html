@@ -15,8 +15,9 @@
       <div class="sention">
         <ul class="nav nav-tabs" style="display: inline-flex;">
           <li class="nav-item">
-            <a [attr.class]="channelDialogueClass('Line')" [attr.id]="channelDialogueId('Line')"
-              (click)="selectLine('Line')" [style.background]="currentType == 'Line' ? '#F9F9F9' : ''">
+            <a [attr.class]="currentType === 'Line' ? 'nav-link active' : 'nav-link '"
+              [attr.id]="currentType === 'Line' ? 'navSelected' : ''" (click)="selectLine('Line')"
+              [style.background]="currentType == 'Line' ? '#F9F9F9' : ''">
               <span>Line</span>
               <span style="position: absolute" *ngIf="lineCounts != 0" class="circle">{{lineCounts}}</span>
             </a>

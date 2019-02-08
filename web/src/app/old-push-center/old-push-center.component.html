@@ -1,0 +1,1255 @@
+<title>發訊中心</title>
+
+<div class="row flex-center">
+
+  <!-- 左半邊 -->
+  <div class="col-md-3 sidebar-module" id="sidebar_left">
+    <div class="sention">
+
+      <!-- 第一層選單 -->
+      <div class="nav nav-tabs menu1" *ngIf="member">
+        <div class="nav-item myMOUSE" *ngIf="member && member.role != 'sales'">
+          <span class="mn1_title" [attr.class]="isMenuClass('customerService')" [attr.id]="isMenuId('customerService')"
+            (click)="selectCustomer()">客服</span>
+        </div>
+        <div class="nav-item myMOUSE" *ngIf="member && member.role != 'sales'">
+          <span class="mn1_title" [attr.class]="isMenuClass('pushService')" [attr.id]="isMenuId('pushService')"
+            (click)="selectPushMessage()">發訊</span>
+        </div>
+      </div>
+
+      <!-- 第二層選單 -->
+      <div class="menu2" *ngIf="member">
+        <ng-container *ngIf="chooseMenu == 'customerService'">
+          <span [attr.class]="chooseType == 'contact' ? 'menuBtn selected myMOUSE' : 'menuBtn myMOUSE'"
+            (click)=" selectContact()">組織</span>
+          <span [attr.class]="chooseType == 'unRead' ? 'menuBtn selected myMOUSE' : 'menuBtn myMOUSE'"
+            (click)=" selectUnRead()">未讀</span>
+        </ng-container>
+        <ng-container *ngIf="chooseMenu == 'pushService'">
+          <span [attr.class]="chooseType == 'push' ? 'menuBtn selected myMOUSE' : 'menuBtn myMOUSE'"
+            (click)=" selectPush()">組織</span>
+          <span [attr.class]="chooseType == 'group' ? 'menuBtn selected myMOUSE' : 'menuBtn myMOUSE'"
+            (click)=" selectGroup()">名單</span>
+          <span [attr.class]="chooseType == 'list' ? 'menuBtn selected myMOUSE' : 'menuBtn myMOUSE'"
+            (click)=" selectList()">批次</span>
+        </ng-container>
+      </div>
+
+      <!-- 客服 -->
+      <div *ngIf="chooseType == 'contact'" style="height: 112%;">
+        <input type="text" class="form-control" (change)="filterSearch()" [(ngModel)]="searchText" placeholder="搜尋">
+        <div id="scrollTouch" style="height: 70%;">
+          <kendo-treeview [nodes]="contactTree" textField="text" kendoTreeViewExpandable
+            [(expandedKeys)]="contactTreeExpanded" kendoTreeViewSelectable kendoTreeViewFlatDataBinding idField="id"
+            parentIdField="parentId" style="font-size: 20px;">
+            <ng-template kendoTreeViewNodeTemplate let-dataItem grid-alt-bg>
+              <div *ngIf="dataItem.type == 'phone'">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>
+                <a style="color:gray;margin: 0px 8px" href="tel:{{dataItem.text}}">{{dataItem.text}}</a>
+              </div>
+              <div *ngIf="dataItem.type == 'email'">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>
+                <a style="color:gray;margin: 0px 8px" href="mailTo:{{dataItem.text}}">{{dataItem.text}}</a>
+              </div>
+              <div *ngIf="dataItem.type == 'root'|| dataItem.type == 'division' || dataItem.type == 'lineGroup'">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+              <div *ngIf="dataItem.type == 'line'" (click)="getMemberRecord(dataItem)">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+              <div *ngIf="dataItem.type == 'group'" class="disableSelect">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+              <div *ngIf="dataItem.type == 'wechat'" (click)="getMemberRecord(dataItem)">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+              <div *ngIf="dataItem.type == 'department'">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+              <div *ngIf="dataItem.type == 'member'" class="disableSelect" (click)="getMemberRecord(dataItem)">
+                <span [ngClass]="kendoService.iconClass(dataItem)" [attr.class]="memberActivityClass(dataItem)"></span>
+                {{dataItem.text}}
+              </div>
+            </ng-template>
+          </kendo-treeview>
+        </div>
+      </div>
+
+      <!-- 未讀 -->
+      <div style="height: 100%;" *ngIf="chooseType == 'unRead'">
+        <input type="text" class="form-control" (change)="filterSearch()" [(ngModel)]="searchText" placeholder="搜尋">
+        <div id="scrollTouch" style="height: 70%;">
+          <kendo-treeview [nodes]="unReadTree" textField="text" kendoTreeViewExpandable
+            [(expandedKeys)]="unReadTreeExpanded" kendoTreeViewSelectable kendoTreeViewFlatDataBinding idField="id"
+            parentIdField="parentId" style="font-size: 20px;">
+            <ng-template kendoTreeViewNodeTemplate let-dataItem>
+              <div *ngIf="dataItem.type == 'root' || dataItem.type == 'lineGroup'">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+              <div *ngIf="dataItem.type == 'member'" class="disableSelect" (click)="getMemberRecord(dataItem)">
+                <span [ngClass]="kendoService.iconClass(dataItem)"
+                  [attr.class]="memberActivityClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+              <div class="circle"
+                *ngIf="dataItem.type =='member' && (dataItem.data.lineCount || dataItem.data.wechatCount)">{{dataItem.data.lineCount
+                        + dataItem.data.wechatCount}}</div>
+              <div *ngIf="dataItem.type == 'phone'">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>
+                <a style="color:gray;margin: 0px 8px" href="tel:{{dataItem.text}}">{{dataItem.text}}</a>
+              </div>
+              <div *ngIf="dataItem.type == 'group'" class="disableSelect">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+              <div *ngIf="dataItem.type == 'email'">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>
+                <a style="color:gray;margin: 0px 8px" href="mailTo:{{dataItem.text}}">{{dataItem.text}}</a>
+              </div>
+              <div *ngIf="dataItem.type == 'line'" (click)="getMemberRecord(dataItem)">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+              <div *ngIf="dataItem.type == 'wechat'" (click)="getMemberRecord(dataItem)">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+            </ng-template>
+          </kendo-treeview>
+        </div>
+      </div>
+
+      <!-- 發訊 -->
+      <div style="height: 100%;" *ngIf="chooseType == 'push'">
+        <input type="text" class="form-control" (change)="filterSearch()" [(ngModel)]="searchText" placeholder="搜尋">
+        <div id="scrollTouch" style="height: 70%;">
+          <kendo-treeview [nodes]="pushTree" textField="text" kendoTreeViewExpandable
+            [(expandedKeys)]="pushTreeExpanded" kendoTreeViewSelectable kendoTreeViewFlatDataBinding idField="id"
+            parentIdField="parentId" style="font-size: 20px;">
+            <ng-template kendoTreeViewNodeTemplate let-dataItem>
+              <div *ngIf="dataItem.type == 'phone'">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>
+                <a style="color:gray;margin: 0px 8px" href="tel:{{dataItem.text}}">{{dataItem.text}}</a>
+              </div>
+              <div *ngIf="dataItem.type == 'email'">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>
+                <a style="color:gray;margin: 0px 8px" href="mailTo:{{dataItem.text}}">{{dataItem.text}}</a>
+              </div>
+              <div *ngIf="dataItem.type == 'root' || dataItem.type == 'lineGroup'">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+              <div *ngIf="dataItem.type == 'line'">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+              <div *ngIf="dataItem.type == 'group'" class="disableSelect" (click)="pushMember(dataItem)">
+                <span *ngIf="receivers && checkReceivers(dataItem)" class="fa fa-check"
+                  style="font-size:20px;color:green"></span>
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+              <div *ngIf="dataItem.type == 'wechat'">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+              <div *ngIf="dataItem.type == 'division'" (click)="pushTotalMembers(dataItem)">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+              <div *ngIf="dataItem.type == 'department'" (click)="pushMembers(dataItem)">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+              <div *ngIf="dataItem.type == 'member'" class="disableSelect" (click)="pushMember(dataItem)">
+                <span [ngClass]="kendoService.iconClass(dataItem)" [attr.class]="memberActivityClass(dataItem)"></span>
+                <span *ngIf="receivers && checkReceivers(dataItem)" class="fa fa-check"
+                  style="font-size:20px;color:green"></span>{{dataItem.text}}
+              </div>
+            </ng-template>
+          </kendo-treeview>
+        </div>
+      </div>
+
+      <!-- 名單 -->
+      <div style="height: 100%;" *ngIf="chooseType == 'group'">
+        <input type="text" class="form-control" (change)="filterSearch()" [(ngModel)]="searchText" placeholder="搜尋">
+        <div id="scrollTouch" style="height: 70%;">
+          <kendo-treeview [nodes]="groupTree" textField="text" kendoTreeViewExpandable
+            [(expandedKeys)]="groupTreeExpanded" kendoTreeViewSelectable kendoTreeViewFlatDataBinding idField="id"
+            parentIdField="parentId" style="font-size: 20px;">
+            <ng-template kendoTreeViewNodeTemplate let-dataItem>
+              <div *ngIf="dataItem.type == 'root'">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+                <span style="font-size: 24px;margin: auto;" class="k-icon k-i-plus-outline"
+                  (click)="editBoolean = true;editType = 'createGroup';"></span>
+              </div>
+              <div *ngIf="dataItem.type == 'org'">
+                <span (click)="pushMembersOfGroup(dataItem)">
+                  <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+                </span>
+                <span class="k-icon k-i-track-changes-enable" style="font-size: 24px"
+                  (click)="editKendoGridGroup(dataItem);editType = 'editGroup';"></span>
+                <span class="k-icon k-i-delete" style="font-size: 24px"
+                  (click)="editKendoGridGroup(dataItem);editType = 'deleteGroup';"></span>
+              </div>
+              <div *ngIf="dataItem.type == 'member'" class="disableSelect" (click)="pushMember(dataItem)">
+                <span [ngClass]="kendoService.iconClass(dataItem)" [attr.class]="memberActivityClass(dataItem)"></span>
+                <span *ngIf="receivers && checkReceivers(dataItem)" class="fa fa-check"
+                  style="font-size:20px;color:green"></span>{{dataItem.text}}
+              </div>
+              <div *ngIf="dataItem.type == 'group'" class="disableSelect" (click)="pushMember(dataItem)">
+                <span *ngIf="receivers && checkReceivers(dataItem)" class="fa fa-check"
+                  style="font-size:20px;color:green"></span>
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+              <div *ngIf="dataItem.type == 'phone'">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>
+                <a style="color:gray;margin: 0px 8px" href="tel:{{dataItem.text}}">{{dataItem.text}}</a>
+              </div>
+              <div *ngIf="dataItem.type == 'email'">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>
+                <a style="color:gray;margin: 0px 8px" href="mailTo:{{dataItem.text}}">{{dataItem.text}}</a>
+              </div>
+              <div *ngIf="dataItem.type == 'line' || dataItem.type == 'lineGroup'">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+              <div *ngIf="dataItem.type == 'wechat'">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+              </div>
+            </ng-template>
+          </kendo-treeview>
+        </div>
+      </div>
+
+      <!-- 批次 -->
+      <div style="height: 100%;" *ngIf="chooseType == 'list'">
+        <input type="text" class="form-control" (change)="filterSearch()" [(ngModel)]="searchText" placeholder="搜尋">
+        <div id="scrollTouch" style="height: 70%;">
+          <kendo-treeview [nodes]="listTree" textField="text" kendoTreeViewExpandable
+            [(expandedKeys)]="listTreeExpanded" kendoTreeViewSelectable kendoTreeViewFlatDataBinding idField="id"
+            parentIdField="parentId" style="font-size: 20px;">
+            <ng-template kendoTreeViewNodeTemplate let-dataItem>
+              <div *ngIf="dataItem.type == 'root'">
+                <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+                <span style="font-size: 24px;margin: auto;" class="k-icon k-i-plus-outline"
+                  (click)="editBoolean = true;editType = 'createBatch';"></span>
+              </div>
+              <div *ngIf="dataItem.type == 'org'">
+                <span (click)="chooseKendoData(dataItem)">
+                  <span *ngIf="gridList && dataItem.id == gridList.id" class="fa fa-check"
+                    style="font-size:20px;color:green"></span>
+                  <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+                </span>
+                <span class="k-icon k-i-track-changes-enable" style="font-size: 24px"
+                  (click)="editKendoGridList(dataItem);editType = 'editBatch';"></span>
+                <span class="k-icon k-i-delete" style="font-size: 24px"
+                  (click)="editKendoGridList(dataItem);editType = 'deleteBatch';"></span>
+              </div>
+            </ng-template>
+          </kendo-treeview>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 正中間 -->
+  <ng-container *ngIf="!editBoolean">
+
+    <!-- 一對一 -->
+    <div class="col-md-6 sidebar_center" *ngIf="chooseType == 'contact' || chooseType == 'unRead'">
+      <div class="sention">
+        <ul class="nav nav-tabs" style="display: inline-flex;">
+          <li class="nav-item">
+            <a [attr.class]="channelDialogueClass('Line')" [attr.id]="channelDialogueId('Line')"
+              (click)="selectLine('Line')" [style.background]="currentType == 'Line' ? '#F9F9F9' : ''">
+              <span>Line</span>
+              <span style="position: absolute" *ngIf="lineCounts != 0" class="circle">{{lineCounts}}</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a [attr.class]="channelDialogueClass('WeChat')" [attr.id]="channelDialogueId('WeChat')"
+              (click)="selectWeChat('WeChat')" [style.background]="currentType == 'WeChat' ? '#F9F9F9' : ''">
+              <span>WeChat</span>
+              <span style="position: absolute" *ngIf="wechatCounts != 0" class="circle">{{wechatCounts}}</span>
+            </a>
+          </li>
+        </ul>
+        <span style="float: right;margin: 9px;" *ngIf="selectedReceiver">聯繫對象 : {{selectedReceiver.name}}</span>
+        <!-- <span class="close" aria-hidden="true" (click)="closeDialogue()">&times;</span> -->
+        <span>
+          <kendo-chat [messages]="conversation" [user]="user" (sendMessage)="saveContentsToDialogue($event)"
+            style="max-height: 80%;;max-width: 44vw;">
+            <kendo-chat-messages send="送出" messagePlaceholder="請輸入訊息">
+            </kendo-chat-messages>
+            <ng-template kendoChatAttachmentTemplate let-dataItem>
+              <div class="k-bubble ng-star-inserted" style="margin: 2px 0;">
+                <a target="_blank" href="{{dataItem.id}}">{{ dataItem.content }}</a>
+              </div>
+            </ng-template>
+          </kendo-chat>
+          <div class="k-message-box">
+            <input [(ngModel)]="messageInput" kendoChatFocusedState type="text" class="k-input"
+              (keydown)="saveContentsToDialogue($event)" placeholder="請輸入訊息">
+            <img class="myMOUSE" *ngIf="selectedReceiver" src=" assets/clip.svg" height="25px" style="margin: 0px 20px;"
+              data-toggle="modal" data-target="#chooseFile" />
+            <img class="noDrop" *ngIf="!selectedReceiver" src="assets/clip.svg" height="25px"
+              style="margin: 0px 20px;" />
+            <img [attr.class]="messageInput == '' ? 'noDrop' : 'myMOUSE'" *ngIf="selectedReceiver"
+              src="assets/send-button.svg" height="25px" (click)="saveContentsToDialogueByValue()" />
+            <img class="noDrop" *ngIf="!selectedReceiver" src="assets/send-button.svg" height="25px" />
+          </div>
+        </span>
+      </div>
+    </div>
+
+    <!-- 發訊 -->
+    <div class="col-md-6 sidebar_center" *ngIf="chooseType == 'push' || chooseType == 'group'">
+      <div class="sention">
+        <h5 *ngIf="member" style="height: 5%;">來自《{{member.name}}》</h5>
+
+        <textarea class="col sention2"
+          style="overflow-y: auto; overflow-x: hidden;width:100%;height:25%;word-wrap:break-word;white-space: -o-pre-wrap;white-space: -pre-wrap;white-space: -moz-pre-wrap;white-space: pre-wrap;"
+          [(ngModel)]="viewMessage"></textarea>
+
+        <div class="sention2">
+          <p style="margin: 0;">收訊人 {{receivers.length}}位</p>
+          <div style="overflow: auto;height: 80%;">
+            <ng-container *ngFor="let receiver of receivers">
+              <span aria-hidden="true" class="badge badge-pill badge-info" style="margin: 4px 3px;font-size: 100%;"
+                (click)="removeReceiver(receiver)">{{receiver?.text}}
+                &times;
+              </span>
+            </ng-container>
+          </div>
+        </div>
+
+        <div class="sention2" style="margin: 10px 0;">
+          <p style="margin: 0;height: 35px;">檔案 {{urlsTotal ? urlsTotal.length : 0}} 件
+            <label class="btn btn-primary btn-sm" data-toggle="modal" data-target="#chooseFile" style="margin: 0.5%;">
+              選擇檔案
+            </label>
+          </p>
+          <div style="overflow: auto;height: 65%;">
+            <span *ngIf="urlsTotal && urlsTotal.length > 0">
+              <ng-container *ngFor="let url of urlsTotal">
+                <li *ngIf="url.name" style="list-style-type:none;">
+                  <div style="white-space:nowrap;">
+                    <a target="_blank" href="{{url.url}}">{{url.name}}</a>
+                    <span style="color:red;text-align:right;margin: 0 10px;" (click)="removeUrls(url)">&times;</span>
+                  </div>
+                  <hr style="margin:3px;">
+                </li>
+              </ng-container>
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group row" style="margin: 0">
+          <label for="comment">頻道 :</label>
+
+          <div class="custom-control custom-radio" style="margin: 0 5px;">
+            <input class="custom-control-input" type="radio" name="RadioOptions" [(ngModel)]="channel"
+              id="channelRadios1" value="Line">
+            <label class="custom-control-label" for="channelRadios1">
+              Line
+            </label>
+          </div>
+          <div class="custom-control custom-radio" style="margin: 0 5px;">
+            <input class="custom-control-input" type="radio" name="RadioOptions" [(ngModel)]="channel"
+              id="channelRadios2" value="WeChat">
+            <label class="custom-control-label" for="channelRadios2">
+              WeChat
+            </label>
+          </div>
+          <div class="custom-control custom-radio" style="margin: 0 5px;">
+            <input class="custom-control-input" type="radio" name="RadioOptions" [(ngModel)]="channel"
+              id="channelRadios3" value="SMS">
+            <label class="custom-control-label" for="channelRadios3">
+              SMS
+            </label>
+          </div>
+          <div class="custom-control custom-radio" style="margin: 0 5px;">
+            <input class="custom-control-input" type="radio" name="RadioOptions" [(ngModel)]="channel"
+              id="channelRadios4" value="Email">
+            <label class="custom-control-label" for="channelRadios4">
+              Email
+            </label>
+          </div>
+
+        </div>
+        <!-- <div class="form-group row">
+                    <label for="staticDate" class="col-sm-3 col-form-label" style="white-space:nowrap;">發送時間</label>
+                    <div class="col-sm-9">
+                        <kendo-datepicker [format]="'yyyy-MM-dd'" [value]="dataValue" style="width:50%"></kendo-datepicker>
+                        <kendo-timepicker [(value)]="dataValue" style="width:50%"></kendo-timepicker>
+                    </div>
+                </div> -->
+        <div class="form-group row" style="margin:3% 0">
+          <label for="comment">發送時刻 :</label>
+
+          <div class="custom-control custom-radio" style="margin: 0 5px;">
+            <input class="custom-control-input" type="radio" [(ngModel)]="pushType" id="exampleRadios1"
+              value="immediate">
+            <label class="custom-control-label" for="exampleRadios1">
+              立即發送
+            </label>
+          </div>
+          <div class="custom-control custom-radio" style="margin: 0 5px;">
+            <input class="custom-control-input" type="radio" [(ngModel)]="pushType" id="exampleRadios2" value="delay">
+            <label class="custom-control-label" for="exampleRadios2">
+              預約發送
+            </label>
+          </div>
+          <div *ngIf="pushType == 'delay'">
+            <kendo-datepicker [format]="'yyyy-MM-dd'" [min]="min" [(value)]="dataValue" style="width:140px">
+            </kendo-datepicker>
+            <kendo-timepicker [(value)]="dataValue" style="width:140px"></kendo-timepicker>
+          </div>
+        </div>
+
+        <button class="btn btn-secondary btn-block" style="margin:2% 0;height: 8%;" (click)="pushMessage()"
+          [disabled]="receivers.length == 0 || !viewMessage || (dataValue.getTime() < min.getTime())">發訊</button>
+
+      </div>
+    </div>
+
+    <!-- 批次清單 -->
+    <div class="col-md-6 sidebar_center" *ngIf="chooseType == 'list'">
+      <div class="sention">
+        <kendo-grid [data]="listData" [skip]="skipList" [sortable]="true" [sort]="sortList"
+          (dataStateChange)="onMessageRecordStateChangeList($event)" style="margin: 10vh 0 5vh 0;height:300px">
+          <kendo-grid-messages noRecords="">
+          </kendo-grid-messages>
+
+          <kendo-grid-column field="name" title="收件人" width="30">
+            <ng-template kendoGridCellTemplate let-dataItem>
+              {{dataItem.name}}
+            </ng-template>
+          </kendo-grid-column>
+
+          <kendo-grid-column field="content" title="訊息" width="130">
+            <ng-template kendoGridCellTemplate let-dataItem>
+              <div [innerHtml]="dataItem.content.replace(breakLine, '<br>')"></div>
+              <!-- <pre>{{dataItem.content}}</pre> -->
+            </ng-template>
+          </kendo-grid-column>
+        </kendo-grid>
+
+        <!-- <div class="form-group row" style="margin: 0">
+                    <label for="comment">頻道 :</label>
+                    <div class="custom-control custom-radio" style="margin: 0 5px;">
+                        <input class="custom-control-input" type="radio" [(ngModel)]="channel" id="exampleRadios1"
+                            value="Line">
+                        <label class="custom-control-label" for="exampleRadios1">
+                            Line
+                        </label>
+                    </div>
+                    <div class="custom-control custom-radio" style="margin: 0 5px;">
+                        <input class="custom-control-input" type="radio" [(ngModel)]="channel" id="exampleRadios2"
+                            value="WeChat">
+                        <label class="custom-control-label" for="exampleRadios2">
+                            WeChat
+                        </label>
+                    </div>
+                </div> -->
+        <div class="form-group row" style="margin:3% 0">
+          <label for="comment">發送時刻 :</label>
+
+          <div class="custom-control custom-radio" style="margin: 0 5px;">
+            <input class="custom-control-input" type="radio" [(ngModel)]="pushType" id="exampleRadios1"
+              value="immediate">
+            <label class="custom-control-label" for="exampleRadios1">
+              立即發送
+            </label>
+          </div>
+          <div class="custom-control custom-radio" style="margin: 0 5px;">
+            <input class="custom-control-input" type="radio" [(ngModel)]="pushType" id="exampleRadios2" value="delay">
+            <label class="custom-control-label" for="exampleRadios2">
+              預約發送
+            </label>
+          </div>
+          <div *ngIf="pushType == 'delay'">
+            <kendo-datepicker [format]="'yyyy-MM-dd'" [min]="min" [(value)]="dataValue" style="width:140px">
+            </kendo-datepicker>
+            <kendo-timepicker [(value)]="dataValue" style="width:140px"></kendo-timepicker>
+          </div>
+        </div>
+
+        <button class="btn btn-secondary" style="margin:0;float: right;" (click)="pushMessage()"
+          [disabled]="!listData || (dataValue.getTime() < min.getTime())">發訊</button>
+      </div>
+    </div>
+
+  </ng-container>
+
+  <!-- 正中間 修改 -->
+  <ng-container *ngIf="editBoolean">
+
+    <!-- 新增目錄 -->
+    <div class="col-md-6 sidebar_center" *ngIf="editType == 'createCatalog'">
+      <div class="sention">
+        <form>
+          <h5 class="modal-title" id="exampleModalCenterTitle">新增目錄</h5>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">目錄名稱</label>
+            <div class="col-sm-8">
+              <input #createCatalogName type="text" class="form-control" placeholder="請輸入目錄名稱">
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary" (click)="editBoolean=false" style="float:right">取消</button>
+          <button type="button" class="btn btn-primary" (click)="createCatalog(createCatalogName.value)"
+            style="float:right;margin:0 5px">存檔</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 編輯刪除目錄 -->
+    <div class="col-md-6 sidebar_center" *ngIf="editType == 'deleteCatalog'">
+      <div class="sention">
+        <form>
+          <h5 class="modal-title" id="exampleModalCenterTitle">編輯目錄</h5>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">目錄名稱</label>
+            <div class="col-sm-8">
+              <input type="text" [(ngModel)]="editCatalogName" [ngModelOptions]="{standalone: true}"
+                class="form-control">
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary" (click)="editBoolean=false" style="float:right">取消</button>
+          <button type="button" class="btn btn-primary" (click)="deleteCatalog()"
+            style="float:right;margin:0 5px">刪除</button>
+          <button type="button" class="btn btn-primary" (click)="saveCatalog()"
+            style="float:right;margin:0 5px">存檔</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 新增動態樣板 -->
+    <div class="col-md-6 sidebar_center" *ngIf="editType == 'createDynamicMessage'">
+      <div class="sention">
+        <form>
+          <h5 class="modal-title" id="exampleModalCenterTitle">新增樣板</h5>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">訊息標題</label>
+            <div class="col-sm-8">
+              <input #createMessageTitle type="text" class="form-control" placeholder="請輸入訊息標題">
+            </div>
+          </div>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">訊息封面</label>
+            <div class="col-sm-8">
+              <input #createMessageThumb type="text" class="form-control" placeholder="請輸入訊息封面">
+            </div>
+          </div>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">訊息內容</label>
+            <div class="col-sm-8">
+              <textarea style="height: 205px;" #createMessageContent class="form-control"></textarea>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary" (click)="editBoolean=false" style="float:right">取消</button>
+          <button type="button" class="btn btn-primary"
+            (click)="createDynamicMessage(createMessageTitle.value,createMessageThumb.value,createMessageContent.value)"
+            style="float:right;margin:0 5px">存檔</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 編輯動態樣板 -->
+    <div class="col-md-6 sidebar_center" *ngIf="editType == 'editDynamicMessage'">
+      <div class="sention">
+        <form>
+          <h5 class="modal-title" id="exampleModalCenterTitle">編輯樣板</h5>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">樣板ID</label>
+            <div class="col-sm-8">
+              <input #editMessageTitle type="text" class="form-control" [(ngModel)]="selectMessage.id"
+                [ngModelOptions]="{standalone: true}" readonly>
+            </div>
+          </div>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">訊息標題</label>
+            <div class="col-sm-8">
+              <input #editMessageTitle type="text" class="form-control" [(ngModel)]="selectMessage.title"
+                [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">訊息封面</label>
+            <div class="col-sm-8">
+              <input #editMessageThumb type="text" class="form-control" [(ngModel)]="selectMessage.thumb"
+                [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">訊息內容</label>
+            <div class="col-sm-8">
+              <textarea style="height: 150px;" #editMessageContent class="form-control"
+                [(ngModel)]="selectMessage.content" [ngModelOptions]="{standalone: true}"></textarea>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary" (click)="editBoolean=false" style="float:right">取消</button>
+          <button type="button" class="btn btn-primary"
+            (click)="editDynamicMessage(editMessageTitle.value,editMessageThumb.value,editMessageContent.value)"
+            style="float:right;margin:0 5px">存檔</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 刪除動態樣板 -->
+    <div class="col-md-6 sidebar_center" *ngIf="editType == 'deleteDynamicMessage'">
+      <div class="sention">
+        <form>
+          <h5 class="modal-title" id="exampleModalCenterTitle">編輯樣板</h5>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">樣板ID</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" [(ngModel)]="selectMessage.id"
+                [ngModelOptions]="{standalone: true}" readonly>
+            </div>
+          </div>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">訊息標題</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" [(ngModel)]="selectMessage.title"
+                [ngModelOptions]="{standalone: true}" readonly>
+            </div>
+          </div>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">訊息封面</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" [(ngModel)]="selectMessage.thumb"
+                [ngModelOptions]="{standalone: true}" readonly>
+            </div>
+          </div>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">訊息內容</label>
+            <div class="col-sm-8">
+              <textarea style="height: 150px;" class="form-control" [(ngModel)]="selectMessage.content"
+                [ngModelOptions]="{standalone: true}" readonly></textarea>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary" (click)="editBoolean=false" style="float:right">取消</button>
+          <button type="button" class="btn btn-primary" (click)="deleteMessage()"
+            style="float:right;margin:0 5px">刪除</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 新增靜態訊息 -->
+    <div class="col-md-6 sidebar_center" *ngIf="editType == 'createStaticMessage'">
+      <div class="sention">
+        <form>
+          <h5 class="modal-title" id="exampleModalCenterTitle">新增樣板</h5>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">訊息標題</label>
+            <div class="col-sm-8">
+              <input #createMessageName type="text" class="form-control" placeholder="請輸入訊息標題">
+            </div>
+          </div>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">訊息內容</label>
+            <div class="col-sm-8">
+              <textarea style="height: 260px;" #createMessageContent class="form-control"></textarea>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary" (click)="editBoolean=false" style="float:right">取消</button>
+          <button type="button" class="btn btn-primary"
+            (click)="createStaticMessage(createMessageName.value,createMessageContent.value)"
+            style="float:right;margin:0 5px">存檔</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 編輯靜態訊息 -->
+    <div class="col-md-6 sidebar_center" *ngIf="editType == 'editStaticMessage'">
+      <div class="sention">
+        <form>
+          <h5 class="modal-title" id="exampleModalCenterTitle">編輯樣板</h5>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">訊息標題</label>
+            <div class="col-sm-8">
+              <input #editMessageName type="text" class="form-control" [(ngModel)]="selectMessage.title"
+                [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">訊息內容</label>
+            <div class="col-sm-8">
+              <textarea style="height: 260px;" #editMessageContent class="form-control"
+                [(ngModel)]="selectMessage.content" [ngModelOptions]="{standalone: true}"></textarea>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary" (click)="editBoolean=false" style="float:right">取消</button>
+          <button type="button" class="btn btn-primary"
+            (click)="editStaticMessage(editMessageName.value,editMessageContent.value)"
+            style="float:right;margin:0 5px">存檔</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 刪除靜態訊息 -->
+    <div class="col-md-6 sidebar_center" *ngIf="editType == 'deleteStaticMessage'">
+      <div class="sention">
+        <form>
+          <h5 class="modal-title" id="exampleModalCenterTitle">刪除樣板</h5>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">訊息標題</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" [(ngModel)]="selectMessage.title"
+                [ngModelOptions]="{standalone: true}" readonly>
+            </div>
+          </div>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">訊息內容</label>
+            <div class="col-sm-8">
+              <textarea style="height: 260px;" class="form-control" [(ngModel)]="selectMessage.content"
+                [ngModelOptions]="{standalone: true}" readonly></textarea>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary" (click)="editBoolean=false" style="float:right">取消</button>
+          <button type="button" class="btn btn-primary" (click)="deleteMessage()"
+            style="float:right;margin:0 5px">刪除</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 名單匯入 -->
+    <div class="col-md-6 sidebar_center" *ngIf="editType == 'createGroup'">
+      <div class="sention">
+        <form>
+          <h5 class="modal-title" id="exampleModalCenterTitle">名單匯入</h5>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">名單標題</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" [(ngModel)]="groupName" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">檔案名稱</label>
+            <div class="col-sm-8">
+              <label class="btn btn-primary btn-sm">
+                <input type="file" style="display:none;" id="fileButton" name="fileButton" accept=".xlsx,.ods"
+                  (change)="uploadFile($event)" base-sixty-four-input />
+                上傳檔案
+              </label>
+              <span *ngIf="fileName" style="margin: 0 5px;">{{fileName}}</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary"
+            (click)="editBoolean=false;groupName='';fileName='';file = null;" style="float:right">取消</button>
+          <button type="button" class="btn btn-primary" (click)="importMemberAndMessageList('group')"
+            style="float:right;margin:0 5px">匯入</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 名單編輯 -->
+    <div class="
+                        col-md-6 sidebar_center" *ngIf="editType == 'editGroup'">
+      <div class="sention">
+        <div style="margin: 10vh 0 5vh 0;">
+          <h5 class="modal-title" id="exampleModalCenterTitle">編輯名單</h5>
+          <kendo-grid [data]="listData" [skip]="skipList" [sortable]="true" [sort]="sortList"
+            (dataStateChange)="onMessageRecordStateChangeList($event)" (add)="addGroupHandler($event)"
+            (edit)="editGroupHandler($event)" (remove)="dialogOpenedDelete = true;selectedEvent = $event;"
+            (cancel)="cancelHandler($event)" (save)="dialogOpenedSave = true;selectedEvent = $event;"
+            style="height:300px;margin: 5px 0 0 0;">
+            <kendo-grid-messages noRecords="">
+            </kendo-grid-messages>
+
+            <ng-template kendoGridToolbarTemplate>
+              <button look="flat" kendoGridAddCommand icon="k-icon k-i-plus-outline k-icon-24"></button>
+            </ng-template>
+
+            <kendo-grid-column field="name" title="收件人" width="30">
+              <ng-template kendoGridCellTemplate let-dataItem>
+                {{dataItem.name}}
+              </ng-template>
+              <ng-template kendoGridEditTemplate let-dataItem="dataItem" let-formGroup="formGroup">
+                <button class="k-button" look="flat" data-toggle="modal"
+                  data-target="#chooseMember">{{editMember.name}}</button>
+              </ng-template>
+            </kendo-grid-column>
+
+            <kendo-grid-command-column title="功能" width="60">
+              <ng-template kendoGridCellTemplate let-isNew="isNew">
+                <button look="flat" kendoGridEditCommand icon="k-icon k-i-track-changes-enable k-icon-24"
+                  [primary]="true"></button>
+                <!-- <button look="flat" icon="k-icon k-i-minus-outline k-icon-24" *ngIf="!openedRemoveDialog"
+                           (click)="openedRemoveDialog=true">Open dialog</button> -->
+                <button look="flat" kendoGridRemoveCommand icon="k-icon k-i-delete k-icon-24"></button>
+                <button look="flat" kendoGridSaveCommand icon="k-icon k-i-save k-icon-24"
+                  [disabled]="!formGroup?.value.name || editMember.name == '收件人'"></button>
+                <button look="flat" kendoGridCancelCommand icon="k-icon k-i-minus-outline k-icon-24"></button>
+                <!-- <button kendoGridSaveCommand [disabled]="!formGroup?.value.name || editMember.name == '收件人'">{{
+                           isNew ? '新增' : '更新' }}</button>
+                        <button kendoGridCancelCommand>{{ isNew ? '取消' : '取消' }}</button> -->
+              </ng-template>
+            </kendo-grid-command-column>
+          </kendo-grid>
+          <button class="btn btn-secondary" style="margin: 40px 0;float: right;" (click)="editBoolean=false">關閉</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 名單刪除 -->
+    <div class="col-md-6 sidebar_center" *ngIf="editType == 'deleteGroup'">
+      <div class="sention">
+        <div style="margin: 10vh 0 5vh 0;">
+          <h5 class="modal-title" id="exampleModalCenterTitle">刪除名單</h5>
+          <kendo-grid [data]="listData" [skip]="skipList" [sortable]="true" [sort]="sortList"
+            (dataStateChange)="onMessageRecordStateChangeList($event)" style="height:300px;margin: 5px 0 0 0;">
+            <kendo-grid-messages noRecords="">
+            </kendo-grid-messages>
+            <kendo-grid-column field="name" title="收件人" width="30">
+              <ng-template kendoGridCellTemplate let-dataItem>
+                {{dataItem.name}}
+              </ng-template>
+            </kendo-grid-column>
+          </kendo-grid>
+          <button class="btn btn-secondary" style="margin: 40px 0;float: right;" (click)="editBoolean=false">關閉</button>
+          <button class="btn btn-secondary" style="margin: 40px 5px;float: right;" (click)="deleteGroup()">刪除</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 批次匯入 -->
+    <div class="col-md-6 sidebar_center" *ngIf="editType == 'createBatch'">
+      <div class="sention">
+        <form>
+          <h5 class="modal-title" id="exampleModalCenterTitle">批次匯入</h5>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">批次標題</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" [(ngModel)]="groupName" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row" style="margin-top: 1rem;margin-left: 1rem;">
+            <label class="col-sm-4 col-form-label">檔案名稱</label>
+            <div class="col-sm-8">
+              <label class="btn btn-primary btn-sm">
+                <input type="file" style="display:none;" id="fileButton" name="fileButton" accept=".xlsx,.ods"
+                  (change)="uploadFile($event)" base-sixty-four-input />
+                上傳檔案
+              </label>
+              <span *ngIf="fileName" style="margin: 0 5px;">{{fileName}}</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary"
+            (click)="editBoolean=false;groupName='';fileName='';file = null;" style="float:right">取消</button>
+          <button type="button" class="btn btn-primary" (click)="importMemberAndMessageList('batchGroup')"
+            style="float:right;margin:0 5px">匯入</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 批次編輯 -->
+    <div class="col-md-6 sidebar_center" *ngIf="editType == 'editBatch'">
+      <div class="sention">
+        <div style="margin: 10vh 0 5vh 0;">
+          <h5 class="modal-title" id="exampleModalCenterTitle">編輯</h5>
+          <kendo-grid [data]="listData" [skip]="skipList" [sortable]="true" [sort]="sortList"
+            (dataStateChange)="onMessageRecordStateChangeList($event)" (add)="addHandler($event)"
+            (edit)="editHandler($event)" (remove)="dialogOpenedDelete = true;selectedEvent = $event;"
+            (cancel)="cancelHandler($event)" (save)="dialogOpenedSave = true;selectedEvent = $event;"
+            style="height:300px;margin: 5px 0 0 0;">
+            <kendo-grid-messages noRecords="">
+            </kendo-grid-messages>
+
+            <ng-template kendoGridToolbarTemplate>
+              <button look="flat" kendoGridAddCommand icon="k-icon k-i-plus-outline k-icon-24"></button>
+            </ng-template>
+
+            <kendo-grid-column field="name" title="收件人" width="30">
+              <ng-template kendoGridCellTemplate let-dataItem>
+                {{dataItem.name}}
+              </ng-template>
+              <ng-template kendoGridEditTemplate let-dataItem="dataItem" let-formGroup="formGroup">
+                <button class="k-button" look="flat" data-toggle="modal"
+                  data-target="#chooseMember">{{editMember.name}}</button>
+              </ng-template>
+            </kendo-grid-column>
+
+            <kendo-grid-column field="content" title="訊息" width="130">
+              <ng-template kendoGridCellTemplate let-dataItem>
+                <div [innerHtml]="dataItem.content.replace(breakLine, '<br>')"></div>
+              </ng-template>
+              <ng-template kendoGridEditTemplate let-dataItem="dataItem" let-formGroup="formGroup">
+                <textarea class="form-control" rows="3" ref-textarea [(ngModel)]="formGroup.value.content"></textarea>
+              </ng-template>
+            </kendo-grid-column>
+
+            <kendo-grid-command-column title="功能" width="60">
+              <ng-template kendoGridCellTemplate let-isNew="isNew" let-formGroup>
+                <button look="flat" kendoGridEditCommand icon="k-icon k-i-track-changes-enable k-icon-24"
+                  [primary]="true"></button>
+                <button look="flat" kendoGridRemoveCommand icon="k-icon k-i-delete k-icon-24"></button>
+                <button look="flat" kendoGridSaveCommand icon="k-icon k-i-save k-icon-24"
+                  [disabled]="editMember.name == '收件人'"></button>
+                <button look="flat" kendoGridCancelCommand icon="k-icon k-i-minus-outline k-icon-24"></button>
+                <!-- <button kendoGridSaveCommand [disabled]="editMember.name == '收件人'">{{
+                           isNew ? '新增' : '更新' }}</button>
+                        <button kendoGridCancelCommand>{{ isNew ? '取消' : '取消' }}</button> -->
+              </ng-template>
+            </kendo-grid-command-column>
+          </kendo-grid>
+          <button class="btn btn-secondary" style="margin: 40px 0;float: right;"
+            (click)="editBoolean=false;">關閉</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 批次刪除 -->
+    <div class="col-md-6 sidebar_center" *ngIf="editType == 'deleteBatch'">
+      <div class="sention">
+        <div style="margin: 10vh 0 5vh 0;">
+          <h5 class="modal-title" id="exampleModalCenterTitle">刪除批次</h5>
+          <kendo-grid [data]="listData" [skip]="skipList" [sortable]="true" [sort]="sortList"
+            (dataStateChange)="onMessageRecordStateChangeList($event)" style="height:300px;margin: 5px 0 0 0;">
+            <kendo-grid-messages noRecords="">
+            </kendo-grid-messages>
+            <kendo-grid-column field="name" title="收件人" width="30">
+              <ng-template kendoGridCellTemplate let-dataItem>
+                {{dataItem.name}}
+              </ng-template>
+            </kendo-grid-column>
+
+            <kendo-grid-column field="content" title="訊息" width="130">
+              <ng-template kendoGridCellTemplate let-dataItem>
+                <div [innerHtml]="dataItem.content.replace(breakLine, '<br>')"></div>
+              </ng-template>
+            </kendo-grid-column>
+          </kendo-grid>
+          <button class="btn btn-secondary" style="margin: 40px 0;float: right;" (click)="editBoolean=false">關閉</button>
+          <button class="btn btn-secondary" style="margin: 40px 5px;float: right;" (click)="deleteList()">刪除</button>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+
+  <!-- 右半邊 -->
+  <div class="col-md-3 sidebar-module" id="sidebar_right">
+    <div class="sention">
+
+      <!-- 動靜態 -->
+      <div class="nav nav-tabs menu1" *ngIf="member">
+        <div class="nav-item">
+          <span class="mn1_title"
+            [attr.class]="messageType == 'static' ? 'nav-link active myMOUSE' : 'nav-link myMOUSE'"
+            [attr.id]="messageType === 'static' ? 'navSelected' : ''" (click)="templateMessage('static')">靜態樣版</span>
+        </div>
+        <div class="nav-item" *ngIf="member && member.role =='admin'">
+          <span class="mn1_title"
+            [attr.class]="messageType == 'dynamic' ? 'nav-link active myMOUSE' : 'nav-link myMOUSE'"
+            [attr.id]="messageType === 'dynamic' ? 'navSelected' : ''" (click)="templateMessage('dynamic')">動態樣版</span>
+        </div>
+      </div>
+
+      <!-- 目錄 -->
+      <!-- <div style="display:flex;" class="menu2">
+                <div class="nav nav-tabs" *ngIf="catalogs" style="overflow-x: scroll;width: 80%;" id="style-3">
+                    <ng-container *ngFor="let catalog of catalogs">
+                        <h5>
+                        <span *ngIf="chooseCatalog" [attr.class]="catalog.id == chooseCatalog.id ? 'btn btn-outline-info c active' : 'btn btn-outline-info marginLeft5px'"
+                                    (click)=" selectCatalog(catalog)">{{catalog.name}}</span>
+                        </h5>
+                        <span *ngIf="chooseCatalog" [attr.class]="catalog.id == chooseCatalog.id ? 'menuBtn2 selected' : 'menuBtn2'"
+                            (click)=" selectCatalog(catalog)">{{catalog.name}}</span>
+                    </ng-container>
+
+                </div>
+                <span style="font-size: 24px;margin: auto 0;" class="k-icon k-i-plus-outline" (click)="createCatalogInterface()"></span>
+            </div> -->
+      <div style="display:flex" class="menu2">
+        <ul class="nav nav-tabs" id="style-3" style="display: -webkit-box;overflow: -webkit-paged-x;width: 80%;">
+          <ng-container *ngIf="catalogs">
+            <h5 *ngIf="catalogs.length == 0">
+              <span class="badge badge-pill badge-light myMOUSE" (click)="createCatalogInterface()">點選新增</span>
+            </h5>
+            <ng-container *ngFor="let catalog of catalogs">
+              <h5>
+                <span *ngIf="chooseCatalog"
+                  [attr.class]="catalog.id == chooseCatalog.id ? 'badge badge-pill badge-light selected myMOUSE' : 'badge badge-pill badge-light myMOUSE'"
+                  (click)=" selectCatalog(catalog)">{{catalog.name}}</span>
+              </h5>
+            </ng-container>
+          </ng-container>
+        </ul>
+        <span style="font-size: 24px;margin: auto;" class="k-icon k-i-plus-outline"
+          (click)="createCatalogInterface()"></span>
+        <span style="font-size: 24px;margin: auto;" class="k-icon k-i-track-changes-enable"
+          (click)="this.editBoolean = true;this.editType = 'deleteCatalog';editCatalogName = chooseCatalog.name;"></span>
+      </div>
+
+      <!-- 動態樣板樹 -->
+      <div id="scrollTouch" style="height: 90%;" *ngIf="messageType == 'dynamic'">
+        <kendo-treeview [nodes]="dynamicMessageTree" textField="name" kendoTreeViewExpandable
+          [(expandedKeys)]="dynamicMessageTreeExpanded" kendoTreeViewFlatDataBinding idField="id"
+          parentIdField="parentId" style="font-size: 20px;">
+          <ng-template kendoTreeViewNodeTemplate let-dataItem>
+            <div *ngIf="dataItem.type == 'root'">
+              <span [ngClass]="kendoService.iconClassRight(dataItem)"></span>{{dataItem.text}}
+              <span class="k-icon k-i-plus-outline" style="font-size: 24px"
+                (click)="editBoolean = true;editType = 'createDynamicMessage'"></span>
+            </div>
+            <div *ngIf="dataItem.type == 'message'">
+              <span (click)="chooseMessage(dataItem.data)">
+                <span [ngClass]="kendoService.iconClassRight(dataItem)"></span>{{dataItem.text}}
+              </span>
+              <span class="k-icon k-i-track-changes-enable" style="font-size: 24px"
+                (click)="editBoolean = true;editType = 'editDynamicMessage';selectMessage = dataItem.data"></span>
+              <span class="k-icon k-i-delete" style="font-size: 24px"
+                (click)="editBoolean = true;editType = 'deleteDynamicMessage';selectMessage = dataItem.data"></span>
+            </div>
+          </ng-template>
+        </kendo-treeview>
+      </div>
+
+      <!-- 靜態樣板樹-->
+      <div id="scrollTouch" style="height: 90%;" *ngIf="messageType == 'static'">
+        <kendo-treeview [nodes]="staticMessageTree" textField="name" kendoTreeViewExpandable
+          [(expandedKeys)]="staticMessageTreeExpanded" kendoTreeViewFlatDataBinding idField="id"
+          parentIdField="parentId" style="font-size: 20px;">
+          <ng-template kendoTreeViewNodeTemplate let-dataItem>
+            <div *ngIf="dataItem.type == 'root'">
+              <span [ngClass]="kendoService.iconClassRight(dataItem)"></span>{{dataItem.text}}
+              <span class="k-icon k-i-plus-outline" style="font-size: 24px"
+                (click)="editBoolean = true;editType = 'createStaticMessage'"></span>
+            </div>
+            <div *ngIf="dataItem.type == 'message'">
+              <span (click)="chooseMessage(dataItem.data)">
+                <span [ngClass]="kendoService.iconClassRight(dataItem)"></span>{{dataItem.text}}
+              </span>
+              <span class="k-icon k-i-track-changes-enable" style="font-size: 24px"
+                (click)="editBoolean = true;editType = 'editStaticMessage';selectMessage = dataItem.data"></span>
+              <span class="k-icon k-i-delete" style="font-size: 24px"
+                (click)="editBoolean = true;editType = 'deleteStaticMessage';selectMessage = dataItem.data"></span>
+            </div>
+          </ng-template>
+        </kendo-treeview>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- <div style="padding-left:5em;padding-top: 2em;width:100%;">
+      <h5>
+         <ng-container *ngIf="member && member.role=='admin'">
+         </ng-container>
+      </h5>
+   </div> -->
+
+  <!-- <kendo-grid [data]="gridData" [loading]="!gridData" [pageSize]="pageSize" [skip]="skip" [sortable]="true" [sort]="sort"
+      [pageable]="true" (dataStateChange)="onMessageRecordStateChange($event)" style="width: 75%;margin: 0 5em;">
+      <kendo-grid-messages noRecords="無發訊紀錄">
+
+      </kendo-grid-messages>
+      <kendo-grid-column field="timeStamp" title="日期/時間" width="100">
+         <ng-template kendoGridCellTemplate let-dataItem>
+            <span>{{dataItem.timeStamp | date:'yyyy/MM/d a h:mm:ss'}}</span>
+         </ng-template>
+      </kendo-grid-column>
+      <kendo-grid-column field="sender" title="發送者" width="130">
+         <ng-template kendoGridCellTemplate let-dataItem>
+            <span>{{dataItem.sender.name}}</span>
+         </ng-template>
+      </kendo-grid-column>
+      <kendo-grid-column field="flowName" title="流程" width="130">
+         <ng-template kendoGridCellTemplate let-dataItem>
+            <span>{{dataItem.flowName}}</span>
+         </ng-template>
+      </kendo-grid-column>
+      <kendo-grid-column field="channel" title="頻道" width="130">
+         <ng-template kendoGridCellTemplate let-dataItem>
+            <span>{{dataItem.channel}}</span>
+         </ng-template>
+      </kendo-grid-column>
+      <kendo-grid-column field="receivers.length" title="人數" width="130">
+         <ng-template kendoGridCellTemplate let-dataItem>
+            <span>{{dataItem.receivers.length}}</span>
+         </ng-template>
+      </kendo-grid-column>
+      <div *kendoGridDetailTemplate="let dataItem">
+         <message-detail [record]="dataItem" (viewContent)="onViewContent($event)" (viewFile)="onViewFile($event)"></message-detail>
+      </div>
+   </kendo-grid> -->
+
+</div>
+
+<!-- 選擇檔案 -->
+<div class="modal fade" id="chooseFile" tabindex="-1" role="dialog" aria-labelledby="chooseFileTitle"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalCenterTitle">選擇檔案</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group row" style="margin: 0 0 10px 0;">
+          <div class="sention2 col" style="height: 250px;">
+            <p style="margin: 0;">檔案</p>
+            <div style="overflow: auto;height:210px;">
+              <kendo-treeview [nodes]="fileTree" textField="text" kendoTreeViewExpandable
+                [(expandedKeys)]="fileTreeExpanded" kendoTreeViewSelectable kendoTreeViewFlatDataBinding idField="id"
+                parentIdField="parentId" style="font-size: 20px;">
+                <ng-template kendoTreeViewNodeTemplate let-dataItem>
+                  <div *ngIf="dataItem.type =='file'" (click)="pushFile(dataItem)">
+                    <span *ngIf="persistentUrls && checkFile(dataItem)" class="fa fa-check"
+                      style="font-size:20px;color:green"></span>
+                    <span [ngClass]="iconClassFolder(dataItem)"></span>{{dataItem.text}}
+                  </div>
+                  <div *ngIf="dataItem.type =='folder' || dataItem.type =='root'">
+                    <span [ngClass]="iconClassFolder(dataItem)"></span>{{dataItem.text}}
+                  </div>
+                </ng-template>
+              </kendo-treeview>
+            </div>
+          </div>
+        </div>
+        <div class="form-group row" style="margin:0px;">
+          <div class="sention2 col" style="height: 150px;margin:0px;">
+            <p style="margin: 0;">附檔
+              <label class="btn btn-primary btn-sm" style="margin:10px;">
+                <input #myInput type="file" style="display:none;" id="fileButton" name="fileButton"
+                  (change)="uploadTempFile($event)" base-sixty-four-input />
+                上傳檔案
+              </label>
+            </p>
+            <div style="overflow: auto;height:90px;">
+              <span *ngIf="persistentUrls && persistentUrls.length >0">
+                <ng-container *ngFor="let persistentUrl of persistentUrls">
+                  <li *ngIf="persistentUrl.name" style="list-style-type:none;">
+                    <div style="white-space:nowrap;">
+                      <a target="_blank" href="{{persistentUrl.url}}">{{persistentUrl.name}}</a>
+                      <span style="color:red;text-align:right;margin: 0 10px;"
+                        (click)="removePersistent(persistentUrl)">&times;</span>
+                    </div>
+                    <hr style="margin:3px;">
+                  </li>
+                </ng-container>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button *ngIf="chooseType == 'push' || chooseType == 'group'" type="button" class="btn btn-primary"
+          (click)="selectUrlTotal()" data-dismiss="modal">確認</button>
+        <button *ngIf="chooseType == 'contact' || chooseType == 'unRead'" type="button" class="btn btn-primary"
+          (click)="sendUrls()" data-dismiss="modal">發送</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 選擇成員 -->
+<div class="modal fade" id="chooseMember" tabindex="-1" role="dialog" aria-labelledby="chooseFileTitle"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalCenterTitle">選擇成員</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+          (click)="editMember={name:'收件人',id:''}">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group row" style="margin:0;">
+          <div style="overflow: auto;height:400px;width: 465px;">
+            <kendo-treeview [nodes]="pushTree" textField="text" kendoTreeViewExpandable
+              [(expandedKeys)]="pushTreeExpanded" kendoTreeViewSelectable kendoTreeViewFlatDataBinding idField="id"
+              parentIdField="parentId" style="font-size: 20px;">
+              <ng-template kendoTreeViewNodeTemplate let-dataItem>
+                <div
+                  *ngIf="dataItem.type == 'root'|| dataItem.type == 'division' || dataItem.type == 'department' || dataItem.type == 'lineGroup'">
+                  <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+                </div>
+                <div *ngIf="dataItem.type == 'member'" (click)="editMember=dataItem.data">
+                  <span *ngIf="editMember && dataItem.data.id == editMember.id" class="fa fa-check"
+                    style="font-size:20px;color:green"></span>
+                  <span [ngClass]="kendoService.iconClass(dataItem)"></span> {{dataItem.text}}
+                </div>
+                <div *ngIf="dataItem.type == 'phone'">
+                  <span [ngClass]="kendoService.iconClass(dataItem)"></span>
+                  <a style="color:gray;margin: 0px 8px" href="tel:{{dataItem.text}}">{{dataItem.text}}</a>
+                </div>
+                <div *ngIf="dataItem.type == 'email'">
+                  <span [ngClass]="kendoService.iconClass(dataItem)"></span>
+                  <a style="color:gray;margin: 0px 8px" href="mailTo:{{dataItem.text}}">{{dataItem.text}}</a>
+                </div>
+                <div *ngIf="dataItem.type == 'line'" (click)="getMemberRecord(dataItem)">
+                  <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+                </div>
+                <div *ngIf="dataItem.type == 'group'" class="disableSelect">
+                  <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+                </div>
+                <div *ngIf="dataItem.type == 'wechat'" (click)="getMemberRecord(dataItem)">
+                  <span [ngClass]="kendoService.iconClass(dataItem)"></span>{{dataItem.text}}
+                </div>
+              </ng-template>
+            </kendo-treeview>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal" (click)="checkChooseMember()">確認</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" (click)="editMember={name:'收件人',id:''}"
+          aria-label="Close">取消</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 轉圈圈動畫 -->
+<div *ngIf="updating">
+  <div class="overlay"></div>
+  <div class="loader"></div>
+</div>
+
+<div class="example-wrapper">
+  <kendo-dialog title="刪除" *ngIf="dialogOpenedDelete" (close)="dialogOpenedDelete = false;" [minWidth]="250"
+    [width]="350">
+    <p style="margin: 30px; text-align: center;">您確定要刪除嗎？</p>
+    <kendo-dialog-actions>
+      <button *ngIf="editType == 'editBatch'" class="k-button" kendoButton (click)="removeHandler(selectedEvent)"
+        primary="true">確認</button>
+      <button *ngIf="editType == 'editGroup'" class="k-button" kendoButton (click)="removeGroupHandler(selectedEvent)"
+        primary="true">確認</button>
+      <button class="k-button" kendoButton (click)="dialogOpenedDelete = false;">取消</button>
+    </kendo-dialog-actions>
+  </kendo-dialog>
+</div>
+
+<div class="example-wrapper">
+  <kendo-dialog title="存檔" *ngIf="dialogOpenedSave" (close)="dialogOpenedSave = false;" [minWidth]="250" [width]="350">
+    <p style="margin: 30px; text-align: center;">您確定要存檔嗎？ </p>
+    <kendo-dialog-actions>
+      <button *ngIf="editType == 'editBatch'" class="k-button" kendoButton (click)="saveHandler(selectedEvent)"
+        primary="true">確認</button>
+      <button *ngIf="editType == 'editGroup'" class="k-button" kendoButton (click)="saveGroupHandler(selectedEvent)"
+        primary="true">確認</button>
+      <button class="k-button" kendoButton (click)="dialogOpenedSave = false;">取消</button>
+    </kendo-dialog-actions>
+  </kendo-dialog>
+</div>
+
+<div class="example-wrapper">
+  <kendo-dialog title="{{dialogDynamicTitle}}" *ngIf="dialogOpenedUpload" (close)="dialogOpenedUpload = false;"
+    [minWidth]="250" [width]="350">
+    <p style="margin: 30px; text-align: center;">{{dialogDynamicMessage}}</p>
+    <kendo-dialog-actions>
+      <button class="k-button" kendoButton (click)="dialogOpenedUpload = false;">確認</button>
+    </kendo-dialog-actions>
+  </kendo-dialog>
+</div>
+<div class="example-wrapper">
+  <kendo-dialog title="名單匯入" *ngIf="dialogOpenedImport" (close)="dialogOpenedImport = false;" [minWidth]="250"
+    [width]="350">
+    <p style="margin: 30px; text-align: center;">{{dialogDynamicMessage}}</p><br />
+    <ng-container *ngFor="let singleErrMsg of invalidUsersImported">
+      <p style="text-align: center;">{{singleErrMsg}}</p>
+    </ng-container>
+    <kendo-dialog-actions>
+      <button class="k-button" kendoButton (click)="dialogOpenedImport = false;">確認</button>
+    </kendo-dialog-actions>
+  </kendo-dialog>
+</div>

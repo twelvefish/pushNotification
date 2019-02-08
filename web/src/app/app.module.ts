@@ -11,7 +11,7 @@ import { AngularFireAuthModule } from "angularfire2/auth"
 import { AppRoutingModule } from "./app-routing.module"
 import { AppComponent } from "./app.component"
 
-import { UserService } from './services/user.service'
+import { UserService } from './services/user/user.service'
 import { GridModule } from '@progress/kendo-angular-grid';
 
 

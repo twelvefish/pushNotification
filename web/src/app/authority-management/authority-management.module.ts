@@ -10,8 +10,8 @@ import { ReactiveFormsModule } from '@angular/forms'
 import { DropDownListModule } from '@progress/kendo-angular-dropdowns'
 import { DialogsModule } from '@progress/kendo-angular-dialog'
 
-import { UserService } from '../services/user.service'
-import { UserApiService } from '../apiServices/user-api.service'
+import { UserService } from '../services/user/user.service'
+import { UserApiService } from '../apiServices/userApi/user-api.service'
 
 @NgModule({
   imports: [

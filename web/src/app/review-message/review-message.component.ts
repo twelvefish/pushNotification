@@ -2,14 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { FilterService, GridDataResult, DataStateChangeEvent } from '@progress/kendo-angular-grid';
 import { SortDescriptor, orderBy, State, process } from "@progress/kendo-data-query"
 
-import { ReviewMessageService } from '../services/review-message.service'
-import { ReviewMessageApiService } from '../apiServices/review-message-api.service';
-import { MemberService } from '../services/member.service';
+import { ReviewMessageService } from '../services/reviewMessage/review-message.service'
+import { ReviewMessageApiService } from '../apiServices/reviewMessageApi/review-message-api.service';
+import { MemberService } from '../services/member/member.service';
 
 import { ReviewMessage, User } from '../model';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Router } from '@angular/router';
-import { UserService } from '../services/user.service';
+import { UserService } from '../services/user/user.service';
 
 @Component({
   selector: 'app-review-message',

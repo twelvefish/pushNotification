@@ -6,8 +6,8 @@ import { GridDataResult } from "@progress/kendo-angular-grid"
 import { orderBy } from "@progress/kendo-data-query"
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 
-import { UserService } from '../services/user.service'
-import { UserApiService } from '../apiServices/user-api.service';
+import { UserService } from '../services/user/user.service'
+import { UserApiService } from '../apiServices/userApi/user-api.service';
 import { User } from '../model';
 
 @Component({

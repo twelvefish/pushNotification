@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Member, KendoNode } from "../model"
+import { Member, KendoNode } from "../../model"
 import * as uuid from 'uuid';
 
 @Injectable({

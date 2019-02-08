@@ -10,8 +10,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MultiSelectModule } from '@progress/kendo-angular-dropdowns';
 import { DialogsModule } from '@progress/kendo-angular-dialog';
 
-import { ReviewMessageService } from '../services/review-message.service'
-import { ReviewMessageApiService } from '../apiServices/review-message-api.service'
+import { ReviewMessageService } from '../services/reviewMessage/review-message.service'
+import { ReviewMessageApiService } from '../apiServices/reviewMessageApi/review-message-api.service'
 
 import { GridDetailComponent } from "./grid-detail/grid-detail.component"
 

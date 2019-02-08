@@ -2,8 +2,8 @@ import { Component, OnInit, ViewEncapsulation, Input, Output, EventEmitter } fro
 import { SortDescriptor, orderBy } from "@progress/kendo-data-query"
 
 import { ReviewMessage, Receiver } from "../../model"
-import { ReviewMessageService } from "../../services/review-message.service"
-import { MemberService } from "../../services/member.service"
+import { ReviewMessageService } from "../../services/reviewMessage/review-message.service"
+import { MemberService } from "../../services/member/member.service"
 import { GridDataResult, DataStateChangeEvent } from "@progress/kendo-angular-grid";
 
 @Component({

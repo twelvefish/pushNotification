@@ -4,7 +4,7 @@ import { AuthenticationGuard } from "./authorize.config"
 
 const routes: Routes = [
   { path: "", redirectTo: "/pushCenter", pathMatch: "full" },
-  { path: "pushCenter", loadChildren: "./push-center/push-center.module#PushCenterModule", canLoad: [AuthenticationGuard] },
+  { path: "pushCenter", loadChildren: "./old-push-center/old-push-center.module#OldPushCenterModule", canLoad: [AuthenticationGuard] },
   { path: "reviewMessage", loadChildren: './review-message/review-message.module#ReviewMessageModule', canLoad: [AuthenticationGuard] },
   { path: "authorityManagement", loadChildren: './authority-management/authority-management.module#AuthorityManagementModule', canLoad: [AuthenticationGuard] },
   // { path: "pdf", children: [{ path: ":fileId", loadChildren: "./fileReader/fileReader.module#FileReaderModule" }] },

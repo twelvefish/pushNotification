@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { environment } from '../../environments/environment'
+import { environment } from '../../../environments/environment'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { AngularFireAuth } from 'angularfire2/auth'
-import { ReviewMessage } from '../model'
+import { ReviewMessage } from '../../model'
 
 @Injectable({
   providedIn: 'root'
